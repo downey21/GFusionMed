@@ -1,0 +1,20 @@
+Package: GFusionMed
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Author: Dahun Seo
+Maintainer: Dahun Seo <downe7921@gmail.com>
+Description: A brief description of what the package does.
+License: GPL-3
+Encoding: UTF-8
+Imports: 
+    Rcpp,
+    rms,
+    Matrix,
+    RcppArmadillo,
+    RcppEigen
+LinkingTo: 
+    Rcpp, 
+    RcppArmadillo, 
+    RcppEigen
+RoxygenNote: 7.3.1
