@@ -3,8 +3,6 @@
 export(fit_outcome_model)
 export(fit_structure_model)
 export(perform_mediation_analysis)
-import(RcppArmadillo)
-import(RcppEigen)
 importFrom(Matrix,bdiag)
 importFrom(Rcpp,sourceCpp)
 importFrom(rms,matinv)

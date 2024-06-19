@@ -2,8 +2,6 @@
 #' @importFrom Rcpp sourceCpp
 #' @importFrom rms matinv
 #' @importFrom Matrix bdiag
-#' @import RcppArmadillo
-#' @import RcppEigen
 NULL
 
 .onLoad <- function(libname, pkgname) {
@@ -15,4 +13,8 @@ NULL
             stop("RcppEigen package is required but not installed.")
         }
     })
+
+    if (!isClass("ndiMatrix")) {
+        setClass("ndiMatrix", contains = "Matrix")
+    }
 }
