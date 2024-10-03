@@ -330,8 +330,9 @@ str(data_for_structure)
 #>   ..$ ERBB3: num [1:105] 0.349 -1.036 0.785 0.621 0.178 ...
 #>   ..$ SHC1 : num [1:105] 0.295 -0.141 0.812 0.196 0.116 ...
 #>   ..$ SRC  : num [1:105] 0.5985 0.0498 -0.3679 -0.1008 0.2671 ...
+```
 
-
+```r
 str(data_for_outcome)
 #> List of 4
 #>  $ CNA    : tibble [104 × 5] (S3: tbl_df/tbl/data.frame)
@@ -365,7 +366,9 @@ file.
 
 ```r
 path_result <- "./application/result"
+```
 
+```r
 result_fit <- GFusionMed::fit_structure_model(data_for_structure,
     cores = 3)
 save(result_fit, file = paste0(path_result, "/fit_structure.RData"))
@@ -383,28 +386,36 @@ non-zero MCMC samples, with stronger edges indicating higher
 proportions. The edge information can be accessed using the
 `edge_summary` function in `GFusionMed`.
 
-    path_result <- "./application/result"
-    path_result_analysis <- "./application/result_analysis"
+```r
+path_result <- "./application/result"
+path_result_analysis <- "./application/result_analysis"
 
-    load(paste0(path_result, "/fit_structure.RData"))
-    result_structure <- result_fit
+load(paste0(path_result, "/fit_structure.RData"))
+result_structure <- result_fit
 
-    load(paste0(path_result, "/fit_outcome.RData"))
-    result_outcome <- result_fit
+load(paste0(path_result, "/fit_outcome.RData"))
+result_outcome <- result_fit
+```
 
-    GFusionMed::plot_network(result_structure = result_structure,
-        path = path_result_analysis, file_name = "plot_network_structure")
+```r
+GFusionMed::plot_network(result_structure = result_structure,
+    path = path_result_analysis, file_name = "plot_network_structure")
+```
 
 ![](./application/result_analysis/plot_network_structure_1.png)
 
-    GFusionMed::plot_network(result_outcome = result_outcome,
-        path = path_result_analysis, file_name = "plot_network_outcome")
+```r
+GFusionMed::plot_network(result_outcome = result_outcome,
+    path = path_result_analysis, file_name = "plot_network_outcome")
+```
 
 ![](./application/result_analysis/plot_network_outcome_1.png)
 
-    GFusionMed::plot_network(result_structure = result_structure,
-        result_outcome = result_outcome, path = path_result_analysis,
-        file_name = "plot_network_structure_outcome")
+```r
+GFusionMed::plot_network(result_structure = result_structure,
+    result_outcome = result_outcome, path = path_result_analysis,
+    file_name = "plot_network_structure_outcome")
+```
 
 ![](./application/result_analysis/plot_network_structure_outcome_1.png)
 
@@ -429,24 +440,26 @@ mediation effect between the exposure and the mediator, and IEC
 (indirect effect from within-layer correlation), capturing mediation
 effects driven by correlations within the same omics layer.
 
-    mediation_analysis <- GFusionMed::perform_mediation_analysis(result_structure,
-        result_outcome)
+```r
+mediation_analysis <- GFusionMed::perform_mediation_analysis(result_structure,
+    result_outcome)
 
-    head(mediation_analysis)
-    #>   Exposure     Mediator        Outcome         IED PIP_IED
-    #> 1 CNA_SHC1   mRNA_ERBB3 Drug_erlotinib -0.00013135  0.0594
-    #> 2 CNA_SHC1   mRNA_ERBB2 Drug_erlotinib    5.69e-06  0.0092
-    #> 3 CNA_SHC1    mRNA_EGFR Drug_erlotinib  0.00035914  0.0089
-    #> 4 CNA_SHC1    mRNA_SHC1 Drug_erlotinib  0.00043441  0.0163
-    #> 5 CNA_SHC1     mRNA_SRC Drug_erlotinib    4.64e-06   6e-04
-    #> 6 CNA_SHC1 Protein_EGFR Drug_erlotinib   3.073e-05  0.0038
-    #>           IEC PIP_IEC         IE PIP_IE
-    #> 1  0.00076205  0.0578 -0.0008934 0.1093
-    #> 2   2.665e-05  0.0132 -2.096e-05 0.0202
-    #> 3 -0.00029326  0.0352 0.00065239 0.0427
-    #> 4 -0.00020338  0.0364 0.00063779 0.0491
-    #> 5     2.4e-07   6e-04   4.41e-06 0.0012
-    #> 6  -6.771e-05    0.01  9.843e-05 0.0137
+head(mediation_analysis)
+#>   Exposure     Mediator        Outcome         IED PIP_IED
+#> 1 CNA_SHC1   mRNA_ERBB3 Drug_erlotinib -0.00013135  0.0594
+#> 2 CNA_SHC1   mRNA_ERBB2 Drug_erlotinib    5.69e-06  0.0092
+#> 3 CNA_SHC1    mRNA_EGFR Drug_erlotinib  0.00035914  0.0089
+#> 4 CNA_SHC1    mRNA_SHC1 Drug_erlotinib  0.00043441  0.0163
+#> 5 CNA_SHC1     mRNA_SRC Drug_erlotinib    4.64e-06   6e-04
+#> 6 CNA_SHC1 Protein_EGFR Drug_erlotinib   3.073e-05  0.0038
+#>           IEC PIP_IEC         IE PIP_IE
+#> 1  0.00076205  0.0578 -0.0008934 0.1093
+#> 2   2.665e-05  0.0132 -2.096e-05 0.0202
+#> 3 -0.00029326  0.0352 0.00065239 0.0427
+#> 4 -0.00020338  0.0364 0.00063779 0.0491
+#> 5     2.4e-07   6e-04   4.41e-06 0.0012
+#> 6  -6.771e-05    0.01  9.843e-05 0.0137
+```
 
 Mediation analysis and network visualization with a fixed exposure on a
 specific variable in a given layer (e.g., EGFR gene expression) can be
@@ -454,27 +467,33 @@ easily performed by specifying the `exposure` argument in the
 `perform_mediation_analysis` and `plot_network` functions in
 `GFusionMed`.
 
-    exposure <- "mRNA_EGFR"
+```r
+exposure <- "mRNA_EGFR"
+```
 
-    RTK_erlotinib_mRNA_EGFR <- GFusionMed::perform_mediation_analysis(result_structure,
-        result_outcome, exposure)
+```r
+RTK_erlotinib_mRNA_EGFR <- GFusionMed::perform_mediation_analysis(result_structure,
+    result_outcome, exposure)
 
-    print(RTK_erlotinib_mRNA_EGFR)
-    #>        Mediator         IED PIP_IED         IEC PIP_IEC
-    #> 4  Protein_SHC1  -0.0463222   0.579 -0.00198425  0.1051
-    #> 1  Protein_EGFR -0.01327284  0.1191   4.139e-05    0.01
-    #> 2 Protein_ERBB2    2.81e-06  0.0023    3.62e-06  0.0079
-    #> 3 Protein_ERBB3    7.06e-06  0.0021    2.11e-06   0.007
-    #> 5   Protein_SRC    4.66e-06   5e-04   -1.26e-06   0.007
-    #>            IE PIP_IE
-    #> 4 -0.04433794 0.6233
-    #> 1 -0.01331424 0.1193
-    #> 2    -8.1e-07 0.0094
-    #> 3    4.95e-06 0.0089
-    #> 5    5.91e-06 0.0074
+print(RTK_erlotinib_mRNA_EGFR)
+#>        Mediator         IED PIP_IED         IEC PIP_IEC
+#> 4  Protein_SHC1  -0.0463222   0.579 -0.00198425  0.1051
+#> 1  Protein_EGFR -0.01327284  0.1191   4.139e-05    0.01
+#> 2 Protein_ERBB2    2.81e-06  0.0023    3.62e-06  0.0079
+#> 3 Protein_ERBB3    7.06e-06  0.0021    2.11e-06   0.007
+#> 5   Protein_SRC    4.66e-06   5e-04   -1.26e-06   0.007
+#>            IE PIP_IE
+#> 4 -0.04433794 0.6233
+#> 1 -0.01331424 0.1193
+#> 2    -8.1e-07 0.0094
+#> 3    4.95e-06 0.0089
+#> 5    5.91e-06 0.0074
+```
 
-    GFusionMed::plot_network(result_structure = result_structure,
-        result_outcome = result_outcome, exposure = exposure,
-        path = path_result_analysis, file_name = "plot_network_structure_outcome_exposure")
+```r
+GFusionMed::plot_network(result_structure = result_structure,
+    result_outcome = result_outcome, exposure = exposure,
+    path = path_result_analysis, file_name = "plot_network_structure_outcome_exposure")
+```
 
 ![](./application/result_analysis/plot_network_structure_outcome_exposure_1.png)
