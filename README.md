@@ -48,7 +48,9 @@ the field of pharmaco-omics.
 Installation
 ------------
 
-    devtools::install_github("downey21/GFusionMed")
+```r
+devtools::install_github("downey21/GFusionMed")
+```
 
 Usage
 
@@ -154,111 +156,115 @@ Additionally, we filtered the drug response data to include responses
 for six specific drugs. The complete analysis process, including the
 code, is provided below.
 
-    # install.packages('BiocManager')
-    # BiocManager::install('depmap')
+```r
+# install.packages('BiocManager')
+# BiocManager::install('depmap')
 
-    suppressPackageStartupMessages({
-        library(depmap)
+suppressPackageStartupMessages({
+    library(depmap)
 
-        library(dplyr)
-        library(stringr)
-        library(tidyr)
-        library(tibble)
-    })
+    library(dplyr)
+    library(stringr)
+    library(tidyr)
+    library(tibble)
+})
 
-    path_data <- "./application/data"
+path_data <- "./application/data"
 
-    cna <- depmap::depmap_copyNumber()  # CNA (depmap 22Q2)
-    mrna <- depmap::depmap_TPM()  # mRNA (depmap 22Q2)
-    protein <- depmap::depmap_RPPA()  # protein (depmap 19Q3)
-    meta <- depmap::depmap_metadata()  # Meta (depmap 22Q2)
-    drug <- depmap::depmap_drug_sensitivity()  # Drug (depmap 21Q2)
+cna <- depmap::depmap_copyNumber()  # CNA (depmap 22Q2)
+mrna <- depmap::depmap_TPM()  # mRNA (depmap 22Q2)
+protein <- depmap::depmap_RPPA()  # protein (depmap 19Q3)
+meta <- depmap::depmap_metadata()  # Meta (depmap 22Q2)
+drug <- depmap::depmap_drug_sensitivity()  # Drug (depmap 21Q2)
 
-    env_save <- new.env(parent = emptyenv())
-    env_save$cna <- cna
-    env_save$mrna <- mrna
-    env_save$protein <- protein
-    env_save$meta <- meta
-    env_save$drug <- drug
+env_save <- new.env(parent = emptyenv())
+env_save$cna <- cna
+env_save$mrna <- mrna
+env_save$protein <- protein
+env_save$meta <- meta
+env_save$drug <- drug
 
-    do.call("save", c(ls(envir = env_save), list(envir = env_save,
-        file = paste0(path_data, "/data_cna_mrna_protein_meta_drug.RData"))))
+do.call("save", c(ls(envir = env_save), list(envir = env_save,
+    file = paste0(path_data, "/data_cna_mrna_protein_meta_drug.RData"))))
 
-    loaded_data <- load(paste0(path_data, "/data_cna_mrna_protein_meta_drug.RData"))
-    ab_map <- tibble::as_tibble(read.csv(paste0(path_data,
-        "/CCLE_RPPA_Ab_info_20181226.csv")))
+loaded_data <- load(paste0(path_data, "/data_cna_mrna_protein_meta_drug.RData"))
+ab_map <- tibble::as_tibble(read.csv(paste0(path_data,
+    "/CCLE_RPPA_Ab_info_20181226.csv")))
 
-    drug_lung_cancer <- c("erlotinib", "gefitinib", "afatinib",
-        "dacomitinib", "osimertinib", "cisplatin")
+drug_lung_cancer <- c("erlotinib", "gefitinib", "afatinib",
+    "dacomitinib", "osimertinib", "cisplatin")
 
-    # common depmap_id
-    lung_cancer_depmap_id <- meta %>%
-        dplyr::filter(primary_disease == "Lung Cancer") %>%
-        dplyr::pull(depmap_id)
+# common depmap_id
+lung_cancer_depmap_id <- meta %>%
+    dplyr::filter(primary_disease == "Lung Cancer") %>%
+    dplyr::pull(depmap_id)
 
-    lung_cancer_depmap_id_cna <- cna %>%
-        dplyr::filter(depmap_id %in% lung_cancer_depmap_id) %>%
-        dplyr::pull(depmap_id)
+lung_cancer_depmap_id_cna <- cna %>%
+    dplyr::filter(depmap_id %in% lung_cancer_depmap_id) %>%
+    dplyr::pull(depmap_id)
 
-    lung_cancer_depmap_id_mrna <- mrna %>%
-        dplyr::filter(depmap_id %in% lung_cancer_depmap_id) %>%
-        dplyr::pull(depmap_id)
+lung_cancer_depmap_id_mrna <- mrna %>%
+    dplyr::filter(depmap_id %in% lung_cancer_depmap_id) %>%
+    dplyr::pull(depmap_id)
 
-    lung_cancer_depmap_id_protein <- protein %>%
-        dplyr::filter(depmap_id %in% lung_cancer_depmap_id) %>%
-        dplyr::pull(depmap_id)
+lung_cancer_depmap_id_protein <- protein %>%
+    dplyr::filter(depmap_id %in% lung_cancer_depmap_id) %>%
+    dplyr::pull(depmap_id)
 
-    lung_cancer_depmap_id_drug <- drug %>%
-        dplyr::filter(depmap_id %in% lung_cancer_depmap_id) %>%
-        dplyr::pull(depmap_id)
+lung_cancer_depmap_id_drug <- drug %>%
+    dplyr::filter(depmap_id %in% lung_cancer_depmap_id) %>%
+    dplyr::pull(depmap_id)
 
-    lung_cancer_depmap_id_intersect <- base::intersect(base::intersect(base::intersect(lung_cancer_depmap_id_cna,
-        lung_cancer_depmap_id_mrna), lung_cancer_depmap_id_protein),
-        lung_cancer_depmap_id_drug)
+lung_cancer_depmap_id_intersect <- base::intersect(base::intersect(base::intersect(lung_cancer_depmap_id_cna,
+    lung_cancer_depmap_id_mrna), lung_cancer_depmap_id_protein),
+    lung_cancer_depmap_id_drug)
 
-    # make dataset for lung cancer data
-    cna_lung_cancer <- cna %>%
-        dplyr::filter(depmap_id %in% lung_cancer_depmap_id_intersect) %>%
-        dplyr::select(c("depmap_id", "gene_name", "log_copy_number")) %>%
-        tidyr::pivot_wider(names_from = gene_name, values_from = log_copy_number) %>%
-        dplyr::arrange(depmap_id)
+# make dataset for lung cancer data
+cna_lung_cancer <- cna %>%
+    dplyr::filter(depmap_id %in% lung_cancer_depmap_id_intersect) %>%
+    dplyr::select(c("depmap_id", "gene_name", "log_copy_number")) %>%
+    tidyr::pivot_wider(names_from = gene_name, values_from = log_copy_number) %>%
+    dplyr::arrange(depmap_id)
 
-    mrna_lung_cancer <- mrna %>%
-        dplyr::filter(depmap_id %in% lung_cancer_depmap_id_intersect) %>%
-        dplyr::select(c("depmap_id", "gene_name", "rna_expression")) %>%
-        tidyr::pivot_wider(names_from = gene_name, values_from = rna_expression) %>%
-        dplyr::arrange(depmap_id)
+mrna_lung_cancer <- mrna %>%
+    dplyr::filter(depmap_id %in% lung_cancer_depmap_id_intersect) %>%
+    dplyr::select(c("depmap_id", "gene_name", "rna_expression")) %>%
+    tidyr::pivot_wider(names_from = gene_name, values_from = rna_expression) %>%
+    dplyr::arrange(depmap_id)
 
-    protein_lung_cancer <- protein %>%
-        dplyr::filter(depmap_id %in% lung_cancer_depmap_id_intersect) %>%
-        dplyr::select(c("depmap_id", "antibody", "expression")) %>%
-        tidyr::pivot_wider(names_from = antibody, values_from = expression) %>%
-        dplyr::arrange(depmap_id)
+protein_lung_cancer <- protein %>%
+    dplyr::filter(depmap_id %in% lung_cancer_depmap_id_intersect) %>%
+    dplyr::select(c("depmap_id", "antibody", "expression")) %>%
+    tidyr::pivot_wider(names_from = antibody, values_from = expression) %>%
+    dplyr::arrange(depmap_id)
 
-    colnames(protein_lung_cancer) <- c("depmap_id", unname(sapply(ab_map$Target_Genes,
-        function(x) stringr::str_split(x, " ")[[1]][1])))
-    protein_lung_cancer <- protein_lung_cancer[, !duplicated(names(protein_lung_cancer))]
+colnames(protein_lung_cancer) <- c("depmap_id", unname(sapply(ab_map$Target_Genes,
+    function(x) stringr::str_split(x, " ")[[1]][1])))
+protein_lung_cancer <- protein_lung_cancer[, !duplicated(names(protein_lung_cancer))]
 
-    drug_lung_cancer <- drug %>%
-        dplyr::filter(depmap_id %in% lung_cancer_depmap_id_intersect) %>%
-        dplyr::select(c("depmap_id", "name", "dependency")) %>%
-        dplyr::filter(name %in% drug_lung_cancer) %>%
-        tidyr::pivot_wider(names_from = name, values_from = dependency) %>%
-        dplyr::arrange(depmap_id)
+drug_lung_cancer <- drug %>%
+    dplyr::filter(depmap_id %in% lung_cancer_depmap_id_intersect) %>%
+    dplyr::select(c("depmap_id", "name", "dependency")) %>%
+    dplyr::filter(name %in% drug_lung_cancer) %>%
+    tidyr::pivot_wider(names_from = name, values_from = dependency) %>%
+    dplyr::arrange(depmap_id)
 
-    env_save <- new.env(parent = emptyenv())
-    env_save$cna_lung_cancer <- cna_lung_cancer
-    env_save$mrna_lung_cancer <- mrna_lung_cancer
-    env_save$protein_lung_cancer <- protein_lung_cancer
-    env_save$drug_lung_cancer <- drug_lung_cancer
+env_save <- new.env(parent = emptyenv())
+env_save$cna_lung_cancer <- cna_lung_cancer
+env_save$mrna_lung_cancer <- mrna_lung_cancer
+env_save$protein_lung_cancer <- protein_lung_cancer
+env_save$drug_lung_cancer <- drug_lung_cancer
 
-    do.call("save", c(ls(envir = env_save), list(envir = env_save,
-        file = paste0(path_data, "/data_cna_mrna_protein_drug_lung_cancer.RData"))))
+do.call("save", c(ls(envir = env_save), list(envir = env_save,
+    file = paste0(path_data, "/data_cna_mrna_protein_drug_lung_cancer.RData"))))
+```
 
 GFusionMed
 ----------
 
-    library(GFusionMed)
+```r
+library(GFusionMed)
+```
 
 `GFusionMed` consists of two main modules: Module 1: Graphical Data
 Fusion and Module 2: Mediation Analysis. The framework is designed to
@@ -303,50 +309,52 @@ shown below. The `data_for_structure` variable is assigned the input for
 structure learning, and the `data_for_outcome` variable is assigned the
 input for outcome learning.
 
-    str(data_for_structure)
-    #> List of 3
-    #>  $ CNA    : tibble [105 × 5] (S3: tbl_df/tbl/data.frame)
-    #>   ..$ SHC1 : num [1:105] 1.089 1.15 1.038 0.995 1.033 ...
-    #>   ..$ ERBB3: num [1:105] 1.09 1.1 1.04 1 1.01 ...
-    #>   ..$ ERBB2: num [1:105] 1.236 1.171 2.076 0.868 0.999 ...
-    #>   ..$ SRC  : num [1:105] 1.14 1.11 1.08 1.23 1.63 ...
-    #>   ..$ EGFR : num [1:105] 4.87 1.03 1.34 1.8 1.51 ...
-    #>  $ mRNA   : tibble [105 × 5] (S3: tbl_df/tbl/data.frame)
-    #>   ..$ ERBB3: num [1:105] 4.51 2.36 3.47 5.42 4.18 ...
-    #>   ..$ ERBB2: num [1:105] 5.05 4.77 5.89 5 6.32 ...
-    #>   ..$ EGFR : num [1:105] 9.674 0.111 5.358 6.567 6.078 ...
-    #>   ..$ SHC1 : num [1:105] 6.05 6.08 5.72 6.64 6.28 ...
-    #>   ..$ SRC  : num [1:105] 5.41 4.26 2.84 4.69 4.97 ...
-    #>  $ Protein: tibble [105 × 5] (S3: tbl_df/tbl/data.frame)
-    #>   ..$ EGFR : num [1:105] 3.577 -0.55 1.516 1.374 0.543 ...
-    #>   ..$ ERBB2: num [1:105] 0.8687 0.0251 2.2781 -0.1693 1.1208 ...
-    #>   ..$ ERBB3: num [1:105] 0.349 -1.036 0.785 0.621 0.178 ...
-    #>   ..$ SHC1 : num [1:105] 0.295 -0.141 0.812 0.196 0.116 ...
-    #>   ..$ SRC  : num [1:105] 0.5985 0.0498 -0.3679 -0.1008 0.2671 ...
+```r
+str(data_for_structure)
+#> List of 3
+#>  $ CNA    : tibble [105 × 5] (S3: tbl_df/tbl/data.frame)
+#>   ..$ SHC1 : num [1:105] 1.089 1.15 1.038 0.995 1.033 ...
+#>   ..$ ERBB3: num [1:105] 1.09 1.1 1.04 1 1.01 ...
+#>   ..$ ERBB2: num [1:105] 1.236 1.171 2.076 0.868 0.999 ...
+#>   ..$ SRC  : num [1:105] 1.14 1.11 1.08 1.23 1.63 ...
+#>   ..$ EGFR : num [1:105] 4.87 1.03 1.34 1.8 1.51 ...
+#>  $ mRNA   : tibble [105 × 5] (S3: tbl_df/tbl/data.frame)
+#>   ..$ ERBB3: num [1:105] 4.51 2.36 3.47 5.42 4.18 ...
+#>   ..$ ERBB2: num [1:105] 5.05 4.77 5.89 5 6.32 ...
+#>   ..$ EGFR : num [1:105] 9.674 0.111 5.358 6.567 6.078 ...
+#>   ..$ SHC1 : num [1:105] 6.05 6.08 5.72 6.64 6.28 ...
+#>   ..$ SRC  : num [1:105] 5.41 4.26 2.84 4.69 4.97 ...
+#>  $ Protein: tibble [105 × 5] (S3: tbl_df/tbl/data.frame)
+#>   ..$ EGFR : num [1:105] 3.577 -0.55 1.516 1.374 0.543 ...
+#>   ..$ ERBB2: num [1:105] 0.8687 0.0251 2.2781 -0.1693 1.1208 ...
+#>   ..$ ERBB3: num [1:105] 0.349 -1.036 0.785 0.621 0.178 ...
+#>   ..$ SHC1 : num [1:105] 0.295 -0.141 0.812 0.196 0.116 ...
+#>   ..$ SRC  : num [1:105] 0.5985 0.0498 -0.3679 -0.1008 0.2671 ...
 
 
-    str(data_for_outcome)
-    #> List of 4
-    #>  $ CNA    : tibble [104 × 5] (S3: tbl_df/tbl/data.frame)
-    #>   ..$ SHC1 : num [1:104] 1.089 1.15 1.038 0.995 1.033 ...
-    #>   ..$ ERBB3: num [1:104] 1.09 1.1 1.04 1 1.01 ...
-    #>   ..$ ERBB2: num [1:104] 1.236 1.171 2.076 0.868 0.999 ...
-    #>   ..$ SRC  : num [1:104] 1.14 1.11 1.08 1.23 1.63 ...
-    #>   ..$ EGFR : num [1:104] 4.87 1.03 1.34 1.8 1.51 ...
-    #>  $ mRNA   : tibble [104 × 5] (S3: tbl_df/tbl/data.frame)
-    #>   ..$ ERBB3: num [1:104] 4.51 2.36 3.47 5.42 4.18 ...
-    #>   ..$ ERBB2: num [1:104] 5.05 4.77 5.89 5 6.32 ...
-    #>   ..$ EGFR : num [1:104] 9.674 0.111 5.358 6.567 6.078 ...
-    #>   ..$ SHC1 : num [1:104] 6.05 6.08 5.72 6.64 6.28 ...
-    #>   ..$ SRC  : num [1:104] 5.41 4.26 2.84 4.69 4.97 ...
-    #>  $ Protein: tibble [104 × 5] (S3: tbl_df/tbl/data.frame)
-    #>   ..$ EGFR : num [1:104] 3.577 -0.55 1.516 1.374 0.543 ...
-    #>   ..$ ERBB2: num [1:104] 0.8687 0.0251 2.2781 -0.1693 1.1208 ...
-    #>   ..$ ERBB3: num [1:104] 0.349 -1.036 0.785 0.621 0.178 ...
-    #>   ..$ SHC1 : num [1:104] 0.295 -0.141 0.812 0.196 0.116 ...
-    #>   ..$ SRC  : num [1:104] 0.5985 0.0498 -0.3679 -0.1008 0.2671 ...
-    #>  $ Drug   : tibble [104 × 1] (S3: tbl_df/tbl/data.frame)
-    #>   ..$ erlotinib: num [1:104] -1.956 0.482 -0.206 -2.044 -0.309 ...
+str(data_for_outcome)
+#> List of 4
+#>  $ CNA    : tibble [104 × 5] (S3: tbl_df/tbl/data.frame)
+#>   ..$ SHC1 : num [1:104] 1.089 1.15 1.038 0.995 1.033 ...
+#>   ..$ ERBB3: num [1:104] 1.09 1.1 1.04 1 1.01 ...
+#>   ..$ ERBB2: num [1:104] 1.236 1.171 2.076 0.868 0.999 ...
+#>   ..$ SRC  : num [1:104] 1.14 1.11 1.08 1.23 1.63 ...
+#>   ..$ EGFR : num [1:104] 4.87 1.03 1.34 1.8 1.51 ...
+#>  $ mRNA   : tibble [104 × 5] (S3: tbl_df/tbl/data.frame)
+#>   ..$ ERBB3: num [1:104] 4.51 2.36 3.47 5.42 4.18 ...
+#>   ..$ ERBB2: num [1:104] 5.05 4.77 5.89 5 6.32 ...
+#>   ..$ EGFR : num [1:104] 9.674 0.111 5.358 6.567 6.078 ...
+#>   ..$ SHC1 : num [1:104] 6.05 6.08 5.72 6.64 6.28 ...
+#>   ..$ SRC  : num [1:104] 5.41 4.26 2.84 4.69 4.97 ...
+#>  $ Protein: tibble [104 × 5] (S3: tbl_df/tbl/data.frame)
+#>   ..$ EGFR : num [1:104] 3.577 -0.55 1.516 1.374 0.543 ...
+#>   ..$ ERBB2: num [1:104] 0.8687 0.0251 2.2781 -0.1693 1.1208 ...
+#>   ..$ ERBB3: num [1:104] 0.349 -1.036 0.785 0.621 0.178 ...
+#>   ..$ SHC1 : num [1:104] 0.295 -0.141 0.812 0.196 0.116 ...
+#>   ..$ SRC  : num [1:104] 0.5985 0.0498 -0.3679 -0.1008 0.2671 ...
+#>  $ Drug   : tibble [104 × 1] (S3: tbl_df/tbl/data.frame)
+#>   ..$ erlotinib: num [1:104] -1.956 0.482 -0.206 -2.044 -0.309 ...
+```
 
 The usage of the fit\_structure\_model and fit\_outcome\_model functions
 is shown below. The `cores` argument in the `fit_structure_model`
@@ -355,14 +363,16 @@ this example, since there are 3 structure layers, 3 cores have been
 allocated. For convenience, the output has been saved as an `RData`
 file.
 
-    path_result <- "./application/result"
+```r
+path_result <- "./application/result"
 
-    result_fit <- GFusionMed::fit_structure_model(data_for_structure,
-        cores = 3)
-    save(result_fit, file = paste0(path_result, "/fit_structure.RData"))
+result_fit <- GFusionMed::fit_structure_model(data_for_structure,
+    cores = 3)
+save(result_fit, file = paste0(path_result, "/fit_structure.RData"))
 
-    result_fit <- GFusionMed::fit_outcome_model(data_for_outcome)
-    save(result_fit, file = paste0(path_result, "/fit_outcome.RData"))
+result_fit <- GFusionMed::fit_outcome_model(data_for_outcome)
+save(result_fit, file = paste0(path_result, "/fit_outcome.RData"))
+```
 
 After assigning the output of the `fit_structure_model` function to
 `result_structure` and the output of the `fit_outcome_model` function to
