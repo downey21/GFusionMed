@@ -7,39 +7,39 @@ and mediation analysis, tailored specifically for pharmaco-omics
 research. It integrates multi-layered graphical models and advanced
 mediation analysis methods, providing an efficient and user-friendly
 pipeline for the exploration of complex biological relationships.
-`GFusionMed` allows researchers to investigate how multi-omics data,
+**`GFusionMed`** allows researchers to investigate how multi-omics data,
 including genetic, transcriptomic, and proteomic information, mediate
 pharmacological responses. By simplifying the implementation of these
-sophisticated techniques, :star: `GFusionMed` :star: aims to accelerate discoveries in
+sophisticated techniques, **`GFusionMed`** aims to accelerate discoveries in
 the field of pharmaco-omics.
 
 ![](./application/result_analysis/fig1.png)
 
 **Module 1: Graphical Data Fusion**
 
--   `fit_structure_model`: Constructs a multi-layered graphical model to
+-   **`fit_structure_model`**: Constructs a multi-layered graphical model to
     capture both undirected (within-layer) and directed (between-layer)
     relationships in multi-omics data.
--   `fit_outcome_model`: Fits an outcome model to study the
+-   **`fit_outcome_model`**: Fits an outcome model to study the
     relationships between omics data and a specific outcome (e.g., drug
     response), compatible with various types of outcomes (continuous,
     binary, ordinal).
--   `plot_network`: Visualizes the fused multi-omics network, where edge
+-   **`plot_network`**: Visualizes the fused multi-omics network, where edge
     transparency reflects the strength of inferred relationships. The
-    function incorporates `edge_summary` function to highlight and
+    function incorporates **`edge_summary`** function to highlight and
     summarize key edges, showcasing significant relationships between
-    omics layers. Results from `fit_structure_model` and
-    `fit_outcome_model` are used to generate a network plot in `.pdf`
+    omics layers. Results from **`fit_structure_model`** and
+    **`fit_outcome_model`** are used to generate a network plot in **`.pdf`**
     format, providing a clear visual representation of the most
     important interactions.
 
 **Module 2: Mediation Analysis**
 
--   `perform_mediation_analysis`: Conducts mediation analysis to
+-   **`perform_mediation_analysis`**: Conducts mediation analysis to
     identify indirect effects of omics variables on outcomes, revealing
     potential causal pathways between multi-omics data and the observed
     pharmacological response.
--   `plot_network`: This function is also used in mediation analysis to
+-   **`plot_network`**: This function is also used in mediation analysis to
     visualize networks, with options to fix an exposure variable for
     specific mediation insights.
 
@@ -104,7 +104,7 @@ GFusionMed::plot_network(result_structure = example_result_structure,
 
 ## Pharmaco-omics data
 
-We applied our `GFusionMed` method to lung cancer cell line data from
+We applied our **`GFusionMed`** method to lung cancer cell line data from
 the DepMap project. The analysis integrated multiple omics layers,
 including copy number alterations (CNA), mRNA expression (mRNA),
 RPPA-based proteomics (Protein), and drug response data (Drug). Our goal
@@ -140,12 +140,12 @@ RTK pathway.
 
 ## Multi-omics and Drug response data
 
-We used the `depmap` R package to download multi-omics data (CNA, mRNA,
+We used the **`depmap`** R package to download multi-omics data (CNA, mRNA,
 and protein) for cancer cell lines. Using the metadata, we specifically
 filtered the data to focus on lung cancer cell lines. Since RPPA data is
 based on antibody-based protein measurements, it requires mapping
 between antibodies and target genes. DepMap provides this mapping
-information in a file named `CCLE_RPPA_Ab_info_20181226.csv`.
+information in a file named **`CCLE_RPPA_Ab_info_20181226.csv`**.
 Additionally, we filtered the drug response data to include responses
 for six specific drugs. The complete analysis process, including the
 code, is provided below.
@@ -259,7 +259,7 @@ do.call("save", c(ls(envir = env_save), list(envir = env_save,
 library(GFusionMed)
 ```
 
-`GFusionMed` consists of two main modules: Module 1: Graphical Data
+**`GFusionMed`** consists of two main modules: Module 1: Graphical Data
 Fusion and Module 2: Mediation Analysis. The framework is designed to
 facilitate the analysis of multi-omics data by integrating structure
 learning and outcome model learning, followed by mediation analysis to
@@ -283,14 +283,14 @@ conditional dependencies between variables at the same level, such as
 gene-gene interactions. Directed relationships, represented by directed
 edges (→), show the influence of one omics layer, like genotype, on
 another, such as gene expression. It is implemented with the
-`fit_structure_model` function in `GFusionMed`.
+**`fit_structure_model`** function in **`GFusionMed`**.
 
 Outcome model learning involves fitting models for the outcome of
 interest, such as drug response. A key advantage of this outcome model
 is its flexibility, as it can be applied to continuous, binary, and
 ordinal outcomes, making it highly versatile for different types of
 pharmacological and clinical data. It is implemented with the
-`fit_outcome_model` function in `GFusionMed`.
+**`fit_outcome_model`** function in **`GFusionMed`**.
 
 The inputs for the fit\_structure\_model and fit\_outcome\_model
 functions are lists containing the datasets. The keys of the list must
@@ -298,8 +298,8 @@ be the names of the layers, and the layers should be arranged in the
 same order as they appear in the list.
 
 An example where the layer structure is CNA → mRNA → Protein → Drug is
-shown below. The `data_for_structure` variable is assigned the input for
-structure learning, and the `data_for_outcome` variable is assigned the
+shown below. The **`data_for_structure`** variable is assigned the input for
+structure learning, and the **`data_for_outcome`** variable is assigned the
 input for outcome learning.
 
 ```r
@@ -351,10 +351,10 @@ str(data_for_outcome)
 ```
 
 The usage of the fit\_structure\_model and fit\_outcome\_model functions
-is shown below. The `cores` argument in the `fit_structure_model`
+is shown below. The **`cores`** argument in the **`fit_structure_model`**
 function specifies the number of CPU cores to use during fitting. In
 this example, since there are 3 structure layers, 3 cores have been
-allocated. For convenience, the output has been saved as an `RData`
+allocated. For convenience, the output has been saved as an **`RData`**
 file.
 
 ```r
@@ -370,14 +370,14 @@ result_fit <- GFusionMed::fit_outcome_model(data_for_outcome)
 save(result_fit, file = paste0(path_result, "/fit_outcome.RData"))
 ```
 
-After assigning the output of the `fit_structure_model` function to
-`result_structure` and the output of the `fit_outcome_model` function to
-`result_outcome`, we can use these outputs for generating network
-visualization `.pdf` file. It is implemented with the `plot_network`
-function in `GFusionMed`. Edge opacity reflects the proportion of
+After assigning the output of the **`fit_structure_model`** function to
+**`result_structure`** and the output of the **`fit_outcome_model`** function to
+**`result_outcome`**, we can use these outputs for generating network
+visualization **`.pdf`** file. It is implemented with the **`plot_network`**
+function in **`GFusionMed`**. Edge opacity reflects the proportion of
 non-zero MCMC samples, with stronger edges indicating higher
 proportions. The edge information can be accessed using the
-`edge_summary` function in `GFusionMed`.
+**`edge_summary`** function in **`GFusionMed`**.
 
 ```r
 path_result <- "./application/result"
@@ -421,8 +421,8 @@ reveal causal pathways between omics variables and the outcome. The
 analysis distinguishes direct effects from indirect effects mediated
 through other molecular entities, offering a deeper understanding of how
 multi-omics data layers contribute to the observed outcomes. It is
-implemented with the `perform_mediation_analysis` function in
-`GFusionMed`.
+implemented with the **`perform_mediation_analysis`** function in
+**`GFusionMed`**.
 
 To assess the presence of an exposure-mediator-outcome signal, the
 posterior inclusion probability (PIP) is computed using MCMC sampling.
@@ -456,9 +456,9 @@ head(mediation_analysis)
 
 Mediation analysis and network visualization with a fixed exposure on a
 specific variable in a given layer (e.g., EGFR gene expression) can be
-easily performed by specifying the `exposure` argument in the
-`perform_mediation_analysis` and `plot_network` functions in
-`GFusionMed`.
+easily performed by specifying the **`exposure`** argument in the
+**`perform_mediation_analysis`** and **`plot_network`** functions in
+**`GFusionMed`**.
 
 ```r
 exposure <- "mRNA_EGFR"
