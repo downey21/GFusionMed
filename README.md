@@ -1,8 +1,6 @@
-GFusionMed: Graphical Fusion and Mediation in Pharmaco-omics
-============================================================
+# GFusionMed: Graphical Fusion and Mediation in Pharmaco-omics
 
-Overview
---------
+## Overview
 
 `GFusionMed` is an R package designed for Bayesian graphical data fusion
 and mediation analysis, tailored specifically for pharmaco-omics
@@ -45,14 +43,13 @@ the field of pharmaco-omics.
     visualize networks, with options to fix an exposure variable for
     specific mediation insights.
 
-Installation
-------------
+## Installation
 
 ```r
 devtools::install_github("downey21/GFusionMed")
 ```
 
-Usage
+## Usage
 
 ```r
 # load package
@@ -103,11 +100,9 @@ GFusionMed::plot_network(result_structure = example_result_structure,
     path = "Set your path", file_name = "plot_network_structure_outcome_exposure")
 ```
 
-Application of GFusionMed
-=========================
+# Application of GFusionMed
 
-Pharmaco-omics data
--------------------
+## Pharmaco-omics data
 
 We applied our `GFusionMed` method to lung cancer cell line data from
 the DepMap project. The analysis integrated multiple omics layers,
@@ -143,8 +138,7 @@ the usage of `GFusionMed`, let’s explore a specific example by examining
 how multiple omics layers influence Erlotinib drug response within the
 RTK pathway.
 
-Multi-omics and Drug response data
-----------------------------------
+## Multi-omics and Drug response data
 
 We used the `depmap` R package to download multi-omics data (CNA, mRNA,
 and protein) for cancer cell lines. Using the metadata, we specifically
@@ -259,8 +253,7 @@ do.call("save", c(ls(envir = env_save), list(envir = env_save,
     file = paste0(path_data, "/data_cna_mrna_protein_drug_lung_cancer.RData"))))
 ```
 
-GFusionMed
-----------
+## GFusionMed
 
 ```r
 library(GFusionMed)
