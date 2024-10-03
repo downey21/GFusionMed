@@ -1,4 +1,4 @@
 CXX14FLAGS=-O3 -march=native -mtune=native
 CXX14=g++ -std=c++14
 
-PKG_LIBS=$(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+PKG_LIBS=$(LAPACK_LIBS) $(BLAS_LIBS)
