@@ -51,55 +51,54 @@ Installation
     devtools::install_github("downey21/GFusionMed")
 
 Usage
+-----
 
-```r
-# load package
-library(GFusionMed)
+    # load package
+    library(GFusionMed)
 
-# Example datasets
-data(example_data_for_structure, package = "GFusionMed")
-data(example_data_for_outcome, package = "GFusionMed")
+    # Example datasets
+    data(example_data_for_structure, package = "GFusionMed")
+    data(example_data_for_outcome, package = "GFusionMed")
 
-# Multi-omics structure learning
-example_result_structure <- GFusionMed::fit_structure_model(example_data_for_structure,
-    cores = 3)
-# just load for example of fitted result
-data(example_result_structure, package = "GFusionMed")
+    # Multi-omics structure learning
+    example_result_structure <- GFusionMed::fit_structure_model(example_data_for_structure,
+        cores = 3)
+    # just load for example of fitted result
+    data(example_result_structure, package = "GFusionMed")
 
-# Outcome model learning
-GFusionMed::fit_outcome_model(data_for_outcome)
-# just load for example of fitted result
-data(example_result_outcome, package = "GFusionMed")
+    # Outcome model learning
+    GFusionMed::fit_outcome_model(data_for_outcome)
+    # just load for example of fitted result
+    data(example_result_outcome, package = "GFusionMed")
 
-# structure network visualilzation
-GFusionMed::plot_network(result_structure = example_result_structure,
-    path = "Set your path", file_name = "plot_network_structure")
+    # structure network visualilzation
+    GFusionMed::plot_network(result_structure = example_result_structure,
+        path = "Set your path", file_name = "plot_network_structure")
 
-# outcome network visualilzation
-GFusionMed::plot_network(result_outcome = example_result_outcome,
-    path = "Set your path", file_name = "plot_network_outcome")
+    # outcome network visualilzation
+    GFusionMed::plot_network(result_outcome = example_result_outcome,
+        path = "Set your path", file_name = "plot_network_outcome")
 
-# structure-outcome network visualilzation
-GFusionMed::plot_network(result_structure = example_result_structure,
-    result_outcome = example_result_outcome, path = "Set your path",
-    file_name = "plot_network_structure_outcome")
+    # structure-outcome network visualilzation
+    GFusionMed::plot_network(result_structure = example_result_structure,
+        result_outcome = example_result_outcome, path = "Set your path",
+        file_name = "plot_network_structure_outcome")
 
-# Mediation analysis
-GFusionMed::perform_mediation_analysis(example_result_structure,
-    example_result_outcome)
+    # Mediation analysis
+    GFusionMed::perform_mediation_analysis(example_result_structure,
+        example_result_outcome)
 
-# Mediation analysis for specific exposure
-# variable
-example_exposure <- "mRNA_EGFR"
-GFusionMed::perform_mediation_analysis(example_result_structure,
-    example_result_outcome, example_exposure)
+    # Mediation analysis for specific exposure
+    # variable
+    example_exposure <- "mRNA_EGFR"
+    GFusionMed::perform_mediation_analysis(example_result_structure,
+        example_result_outcome, example_exposure)
 
-# Network visualization for specific exposure
-# variable
-GFusionMed::plot_network(result_structure = example_result_structure,
-    result_outcome = example_result_outcome, exposure = example_exposure,
-    path = "Set your path", file_name = "plot_network_structure_outcome_exposure")
-```
+    # Network visualization for specific exposure
+    # variable
+    GFusionMed::plot_network(result_structure = example_result_structure,
+        result_outcome = example_result_outcome, exposure = example_exposure,
+        path = "Set your path", file_name = "plot_network_structure_outcome_exposure")
 
 Application of GFusionMed
 =========================
