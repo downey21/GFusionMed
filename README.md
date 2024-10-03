@@ -15,7 +15,7 @@ pharmacological responses. By simplifying the implementation of these
 sophisticated techniques, `GFusionMed` aims to accelerate discoveries in
 the field of pharmaco-omics.
 
-![](/root/Project/GFusionMed/application/result_analysis/fig1.png)
+![](./application/result_analysis/fig1.png)
 
 **Module 1: Graphical Data Fusion**
 
@@ -165,7 +165,7 @@ code, is provided below.
         library(tibble)
     })
 
-    path_data <- "/root/Project/GFusionMed/application/data"
+    path_data <- "./application/data"
 
     cna <- depmap::depmap_copyNumber()  # CNA (depmap 22Q2)
     mrna <- depmap::depmap_TPM()  # mRNA (depmap 22Q2)
@@ -354,7 +354,7 @@ this example, since there are 3 structure layers, 3 cores have been
 allocated. For convenience, the output has been saved as an `RData`
 file.
 
-    path_result <- "/root/Project/GFusionMed/application/result"
+    path_result <- "./application/result"
 
     result_fit <- GFusionMed::fit_structure_model(data_for_structure,
         cores = 3)
@@ -372,8 +372,8 @@ non-zero MCMC samples, with stronger edges indicating higher
 proportions. The edge information can be accessed using the
 `edge_summary` function in `GFusionMed`.
 
-    path_result <- "/root/Project/GFusionMed/application/result"
-    path_result_analysis <- "/root/Project/GFusionMed/application/result_analysis"
+    path_result <- "./application/result"
+    path_result_analysis <- "./application/result_analysis"
 
     load(paste0(path_result, "/fit_structure.RData"))
     result_structure <- result_fit
@@ -384,18 +384,18 @@ proportions. The edge information can be accessed using the
     GFusionMed::plot_network(result_structure = result_structure,
         path = path_result_analysis, file_name = "plot_network_structure")
 
-![](/root/Project/GFusionMed/application/result_analysis/plot_network_structure_1.png)
+![](./application/result_analysis/plot_network_structure_1.png)
 
     GFusionMed::plot_network(result_outcome = result_outcome,
         path = path_result_analysis, file_name = "plot_network_outcome")
 
-![](/root/Project/GFusionMed/application/result_analysis/plot_network_outcome_1.png)
+![](./application/result_analysis/plot_network_outcome_1.png)
 
     GFusionMed::plot_network(result_structure = result_structure,
         result_outcome = result_outcome, path = path_result_analysis,
         file_name = "plot_network_structure_outcome")
 
-![](/root/Project/GFusionMed/application/result_analysis/plot_network_structure_outcome_1.png)
+![](./application/result_analysis/plot_network_structure_outcome_1.png)
 
 ### Module 2: Mediation Analysis
 
@@ -466,4 +466,4 @@ easily performed by specifying the `exposure` argument in the
         result_outcome = result_outcome, exposure = exposure,
         path = path_result_analysis, file_name = "plot_network_structure_outcome_exposure")
 
-![](/root/Project/GFusionMed/application/result_analysis/plot_network_structure_outcome_exposure_1.png)
+![](./application/result_analysis/plot_network_structure_outcome_exposure_1.png)
