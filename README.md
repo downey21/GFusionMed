@@ -66,7 +66,7 @@ example_result_structure <- GFusionMed::fit_structure_model(example_data_for_str
 data(example_result_structure, package = "GFusionMed")
 
 # Outcome model learning
-GFusionMed::fit_outcome_model(data_for_outcome)
+example_result_outcome <- GFusionMed::fit_outcome_model(example_data_for_outcome)
 # just load for example of fitted result
 data(example_result_outcome, package = "GFusionMed")
 

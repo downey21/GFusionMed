@@ -249,10 +249,6 @@ plot_network.structure <- function(result_structure, path, file_name, width = 20
 
     vector_layer <- attr(data_edge, "info")$structure_layer
 
-    exposure_layer <- strsplit(exposure, "_")[[1]][1]
-
-    exposure_layer_index <- which(vector_layer == exposure_layer)
-
     if (!is.null(vector_layer_color)) {
 
         if (!is.vector(vector_layer_color)) {
@@ -348,10 +344,6 @@ plot_network.outcome <- function(result_outcome, path, file_name, width = 20, he
     set.seed(seed) 
 
     vector_layer <- c(attr(data_edge, "info")$structure_layer, attr(data_edge, "info")$outcome_layer)
-
-    exposure_layer <- strsplit(exposure, "_")[[1]][1]
-
-    exposure_layer_index <- which(vector_layer == exposure_layer)
 
     if (!is.null(vector_layer_color)) {
 
