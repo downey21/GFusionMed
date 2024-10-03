@@ -60,13 +60,13 @@ data(example_data_for_structure, package = "GFusionMed")
 data(example_data_for_outcome, package = "GFusionMed")
 
 # Multi-omics structure learning
-example_result_structure <- GFusionMed::fit_structure_model(example_data_for_structure,
-    cores = 3)
+# example_result_structure <- GFusionMed::fit_structure_model(example_data_for_structure,
+#     cores = 3)
 # just load for example of fitted result
 data(example_result_structure, package = "GFusionMed")
 
 # Outcome model learning
-example_result_outcome <- GFusionMed::fit_outcome_model(example_data_for_outcome)
+# example_result_outcome <- GFusionMed::fit_outcome_model(example_data_for_outcome)
 # just load for example of fitted result
 data(example_result_outcome, package = "GFusionMed")
 
