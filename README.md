@@ -2,7 +2,7 @@
 
 ## Overview
 
-`GFusionMed` is an R package designed for Bayesian graphical data fusion
+**`GFusionMed`** is an R package designed for Bayesian graphical data fusion
 and mediation analysis, tailored specifically for pharmaco-omics
 research. It integrates multi-layered graphical models and advanced
 mediation analysis methods, providing an efficient and user-friendly
@@ -10,7 +10,7 @@ pipeline for the exploration of complex biological relationships.
 `GFusionMed` allows researchers to investigate how multi-omics data,
 including genetic, transcriptomic, and proteomic information, mediate
 pharmacological responses. By simplifying the implementation of these
-sophisticated techniques, `GFusionMed` aims to accelerate discoveries in
+sophisticated techniques, :star: `GFusionMed` :star: aims to accelerate discoveries in
 the field of pharmaco-omics.
 
 ![](./application/result_analysis/fig1.png)
