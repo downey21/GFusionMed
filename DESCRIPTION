@@ -6,6 +6,7 @@ Author: Dahun Seo
 Maintainer: Dahun Seo <downe7921@gmail.com>
 Description: GFusionMed (Graphical Fusion for Mediation in Pharmaco-omics) is an R package designed for Bayesian graphical data fusion and mediation analysis, enabling the integration of multi-omics data. By leveraging multi-layered Gaussian graphical models and advanced mediation analysis methods, GFusionMed helps researchers explore complex biological relationships and uncover mediating mechanisms underlying pharmacological responses. The package offers an efficient pipeline for model fitting and mediation analysis, promoting accessibility to sophisticated statistical methods for pharmaco-omics research.
 License: GPL-3
+Depends: R (>= 4.4.0)
 Encoding: UTF-8
 Imports: 
     Rcpp,
