@@ -15,9 +15,10 @@ Imports:
     RcppArmadillo,
     RcppEigen,
     igraph,
-    RColorBrewer
+    RColorBrewer,
+    plotly
 LinkingTo: 
     Rcpp, 
     RcppArmadillo, 
     RcppEigen
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2

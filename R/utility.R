@@ -62,3 +62,35 @@ generate_x_centers <- function(vector_layer, total_range = 3000) {
     
     return(positions)
 }
+
+#' Internal function
+#'
+#' This is an internal function that is not exported.
+assign_group <- function(node, layer_info) {
+    
+    node_split <- strsplit(node, "_")[[1]]
+    layer <- node_split[1]
+    node_name <- paste(node_split[-1], collapse = "_")
+    
+    if (layer %in% names(layer_info)) {
+        
+        group_info <- layer_info[[layer]]
+        
+        for (group_name in names(group_info)) {
+            if (node_name %in% group_info[[group_name]]) {
+                return(paste0(layer, "_", group_name))
+            }
+        }
+    }
+    
+    stop("The group_information must contain the group information for every layer in the form of a list, ensuring no variables are missing from any layer.")
+    
+    return(NA)
+}
+
+#' Internal function
+#'
+#' This is an internal function that is not exported.
+get_group_index <- function(group_name, node_index) {
+    return(node_index[group_name])
+}

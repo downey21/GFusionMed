@@ -579,3 +579,89 @@ plot_network.structure_outcome <- function(result_structure, result_outcome, exp
     invisible(dev.off())
 
 }
+
+#' Sankey Plot
+#'
+#' Visualizes the network when group information for the variables is available.
+#' @export
+plot_sankey <- function(edge_structure, edge_outcome, group_information, vector_layer_color = NULL) {
+
+    if (!is.list(group_information)) {
+        stop("group_information must be a list.")
+    }
+
+    vector_layer <- c(attr(edge_structure, "info")$structure_layer, attr(edge_outcome, "info")$outcome_layer)
+
+    if (!is.null(vector_layer_color)) {
+        
+        if (!is.vector(vector_layer_color)) {
+            stop("vector_layer_color must be a vector containing colors, and its length must match the total number of structure layers.")
+        }
+        
+        if (length(vector_layer_color) != length(vector_layer)) {
+            stop("vector_layer_color must be a vector containing colors, and its length must match the total number of structure layers.")
+        }
+        
+    }
+
+    if (is.null(vector_layer_color)) {
+        vector_layer_color <- assign_colors(vector_layer)
+    }
+
+    data_edge <- rbind(edge_structure, edge_outcome)
+
+    data_edge <- subset(data_edge, Type == "dir")
+    data_edge <- data_edge[, !(names(data_edge) %in% "Type")]
+
+    data_edge <- transform(
+        data_edge,
+        Start_group = sapply(Start, assign_group, layer_info = group_information),
+        End_group = sapply(End, assign_group, layer_info = group_information)
+    )
+
+    node_layer <-
+        sapply(
+            unique(c(data_edge$Start_group, data_edge$End_group)),
+            function(x) strsplit(x, "_")[[1]][1]
+        )
+
+    node_colors <- setNames(vector_layer_color[node_layer], names(node_layer))
+
+    node_vector <- names(node_layer)
+
+    node_vector_index <- setNames(0:(length(node_vector)-1), node_vector)
+
+    data_edge <- transform(
+        data_edge,
+        Start_group_index = sapply(Start_group, get_group_index, node_index = node_vector_index),
+        End_group_index = sapply(End_group, get_group_index, node_index = node_vector_index),
+        Color = paste0("rgba(128, 128, 128, ", Strength^2, ")")
+    )
+
+    fig <- 
+        plotly::plot_ly(
+            type = "sankey",
+            orientation = "h",
+            arrangement = "snap",
+            
+            node = list(
+                label = node_vector,
+                color = node_colors,
+                pad = 15,
+                thickness = 15,
+                line = list(
+                    color = "black",
+                    width = 0.5
+                )
+            ),
+            
+            link = list(
+                source = data_edge$Start_group_index,
+                target = data_edge$End_group_index,
+                value = rep(1, nrow(data_edge)),
+                color = data_edge$Color
+                )   
+            )
+
+    fig
+}
