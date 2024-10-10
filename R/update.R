@@ -197,3 +197,85 @@ updateDirected <- function(y,X,lambda,delta,CCinv,B,Gamma,kappa,qmat,v.no.ue,v.a
 	
     return(list(Gamma=Gamma,kappa=kappa,B=B,is.move=is.move))
 }
+
+#' Internal function
+#'
+#' This is an internal function that is not exported.
+v.updateUndirected <- function(y,X,lambda,delta,Alpha,eta,kappa,pmat,no.de,bCb,no.tau) {
+    # sampling alpha and kappa given eta
+    # Input
+    #   - y : response
+    #   - X: design matrix
+    #   - Afull: chol2inv(chol((crossprod(dat,tdat)+diag(p)*(1/lambda))))
+    #   - lambda, delta: hyperparameters for kappa
+    #   - eta: px1 eta matrix for v
+    #   - kappa: px1 kappa vector (inverse covariance for all nodes)
+    #   - pmat: pxp matrix for hyper parameters for eta
+    #   - no.de : number of directed edges connected to each node (for updating kappa) (vector)
+    #   - bCb : t(b) %*% inv(C) %*% b for updating kappa for each node (vector)
+    #   - no.tau:  number of nodes in the current layer
+
+    n = nrow(X)
+    p = ncol(X)
+    ### Graph movement ###
+    if (sum(eta)==0) {is.swap=0
+    }else{is.swap = rbinom(1,1,1/2)}
+    is.move = FALSE
+    if (!is.swap == 1) { #### ADD-DELETE
+        w.ad = sample(1:p,1)
+        new.eta = eta
+        new.eta[w.ad] = 1-eta[w.ad]
+        is.move = TRUE
+    }else{ #### SWAP
+        cand0 = which(eta==0)
+        cand1 = which(eta==1)
+        if (length(cand0)>0&length(cand1)>0) {
+            w.ad1 = cand0[sample.int(length(cand0))[1]]
+            w.ad2 = cand1[sample.int(length(cand1))[1]]
+            new.eta = eta
+            new.eta[w.ad1] = 1
+            new.eta[w.ad2] = 0
+            is.move = TRUE
+        }
+    }
+
+    ### Sampling parameters ###
+    if (is.move) {
+
+        Afull = base::chol2inv(base::chol((crossprodCpp(X,X)+diag(p)*(1/lambda))))
+        new.addr = which(new.eta==1)
+        addr = which(eta==1)
+        new.addr.inv =  which(new.eta==0)
+        addr.inv = which(eta==0)
+        A.new = giveA(Afull,which=new.addr.inv)
+        A = giveA(Afull,which=addr.inv)
+
+        #sample eta
+
+        lhr1 = dmvnrm_arma(x = matrix(y,ncol=n),mean=rep(0,n),sigma = giveCov(X[,new.addr,drop=F],rep(lambda,length(new.addr)),kappa),log=TRUE)
+        hyper1 = sum(new.eta*log(pmat) + (1-new.eta)*log(1-pmat))
+
+        lhr2 = dmvnrm_arma(x = matrix(y,ncol=n),mean=rep(0,n),sigma =giveCov(X[,addr,drop=F],rep(lambda,length(addr)),kappa) ,log=TRUE)
+        hyper2 = sum(eta*log(pmat) + (1-eta)*log(1-pmat))
+        lhr = lhr1+hyper1-lhr2-hyper2
+
+
+        if (log(runif(1))<lhr) {eta <- new.eta; A<-A.new}
+
+
+        alpha = rep(0,p)
+        resid = y
+        if (!is.null(A)){
+            # sample alpha
+            addr = which(eta==1)
+            if (length(addr)>0) {
+                alpha[addr] = rmvnrm_arma(1,prodCpp(A,crossprodCpp(X[,addr,drop=F],as.matrix(y))),A/kappa)
+            }
+            # sample kappa
+            resid = y -prodCpp(X,as.matrix(alpha))
+        }
+        kappa = stats::rgamma(1,shape=(n+delta+no.tau-1+no.de+sum(alpha!=0))/2,rate=(lambda +sum(resid^2)+bCb+(lambda +no.tau-1)*sum(alpha^2) )/2)
+
+    } #if (is.move)
+    return(list(eta=eta,kappa=kappa,Alpha=alpha,is.move=is.move))
+}
