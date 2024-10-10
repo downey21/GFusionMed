@@ -13,7 +13,8 @@ fit_structure_model(
   eta.prob = 0.5,
   gamma.prob = 0.5,
   seed = 1234,
-  cores = parallel::detectCores() - 1
+  cores = parallel::detectCores() - 1,
+  parallel = FALSE
 )
 }
 \description{

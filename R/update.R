@@ -242,7 +242,7 @@ v.updateUndirected <- function(y,X,lambda,delta,Alpha,eta,kappa,pmat,no.de,bCb,n
     ### Sampling parameters ###
     if (is.move) {
 
-        Afull = base::chol2inv(base::chol((crossprodCpp(X,X)+diag(p)*(1/lambda))))
+        Afull = base::chol2inv(base::chol((t_prod_cpp(X,X)+diag(p)*(1/lambda))))
         new.addr = which(new.eta==1)
         addr = which(eta==1)
         new.addr.inv =  which(new.eta==0)
@@ -269,13 +269,13 @@ v.updateUndirected <- function(y,X,lambda,delta,Alpha,eta,kappa,pmat,no.de,bCb,n
             # sample alpha
             addr = which(eta==1)
             if (length(addr)>0) {
-                alpha[addr] = rmvnrm_arma(1,prodCpp(A,crossprodCpp(X[,addr,drop=F],as.matrix(y))),A/kappa)
+                Alpha[addr] = rmvnrm_arma(1,prod_cpp(A,t_prod_cpp(X[,addr,drop=F],as.matrix(y))),A/kappa)
             }
             # sample kappa
-            resid = y -prodCpp(X,as.matrix(alpha))
+            resid = y - prod_cpp(X,as.matrix(alpha))
         }
         kappa = stats::rgamma(1,shape=(n+delta+no.tau-1+no.de+sum(alpha!=0))/2,rate=(lambda +sum(resid^2)+bCb+(lambda +no.tau-1)*sum(alpha^2) )/2)
 
     } #if (is.move)
-    return(list(eta=eta,kappa=kappa,Alpha=alpha,is.move=is.move))
+    return(list(eta=eta,kappa=kappa,Alpha=Alpha,is.move=is.move))
 }

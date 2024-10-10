@@ -320,10 +320,10 @@ fit_structure_model_node_temp <- function(v,chlist,palist,Y,eta.prob=0.3,gamma.p
 
     while (s<S) {
         s = s+1
-        if (s%%100==0) cat("no. of samples=",s,"\n")
+        # if (s%%100==0) cat("no. of samples=",s,"\n")
         # Update eta, A, kappa
         if (!is.null(v.pa)) {
-            tempDat = dat.C - tcrossprodCpp(dat.P,B)
+            tempDat = dat.C - prod_t_cpp(dat.P,B)
             no.de = sum(B[v.addr,]!=0)
             bCb = sum(B[v.addr,]^2/CC[v.addr,])
         } else{tempDat=dat.C
