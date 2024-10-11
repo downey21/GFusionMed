@@ -70,6 +70,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// make_symmetric_values_cpp
+NumericMatrix make_symmetric_values_cpp(NumericMatrix mat);
+RcppExport SEXP _GFusionMed_make_symmetric_values_cpp(SEXP matSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat(matSEXP);
+    rcpp_result_gen = Rcpp::wrap(make_symmetric_values_cpp(mat));
+    return rcpp_result_gen;
+END_RCPP
+}
+// make_symmetric_zero_cpp
+NumericMatrix make_symmetric_zero_cpp(NumericMatrix mat);
+RcppExport SEXP _GFusionMed_make_symmetric_zero_cpp(SEXP matSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat(matSEXP);
+    rcpp_result_gen = Rcpp::wrap(make_symmetric_zero_cpp(mat));
+    return rcpp_result_gen;
+END_RCPP
+}
 // dmvnrm_arma
 arma::vec dmvnrm_arma(arma::mat x, arma::rowvec mean, arma::mat sigma, bool logd);
 RcppExport SEXP _GFusionMed_dmvnrm_arma(SEXP xSEXP, SEXP meanSEXP, SEXP sigmaSEXP, SEXP logdSEXP) {
@@ -104,6 +126,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_GFusionMed_t_prod_cpp", (DL_FUNC) &_GFusionMed_t_prod_cpp, 2},
     {"_GFusionMed_prod_t_cpp", (DL_FUNC) &_GFusionMed_prod_t_cpp, 2},
     {"_GFusionMed_inverse_cpp", (DL_FUNC) &_GFusionMed_inverse_cpp, 1},
+    {"_GFusionMed_make_symmetric_values_cpp", (DL_FUNC) &_GFusionMed_make_symmetric_values_cpp, 1},
+    {"_GFusionMed_make_symmetric_zero_cpp", (DL_FUNC) &_GFusionMed_make_symmetric_zero_cpp, 1},
     {"_GFusionMed_dmvnrm_arma", (DL_FUNC) &_GFusionMed_dmvnrm_arma, 4},
     {"_GFusionMed_rmvnrm_arma", (DL_FUNC) &_GFusionMed_rmvnrm_arma, 3},
     {NULL, NULL, 0}

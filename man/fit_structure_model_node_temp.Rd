@@ -5,16 +5,17 @@
 \title{Internal function}
 \usage{
 fit_structure_model_node_temp(
-  v,
-  chlist,
-  palist,
+  v.ch,
+  v.pa,
   Y,
   eta.prob = 0.3,
   gamma.prob = 0.3,
   lambda,
   delta,
   burnin.S,
-  inf.S
+  inf.S,
+  inner_cores = inner_cores,
+  method = method
 )
 }
 \description{

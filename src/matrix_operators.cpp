@@ -63,3 +63,40 @@ NumericMatrix inverse_cpp(NumericMatrix mat) {
     MatrixXd invMatEigen = matEigen.inverse();
     return wrap(invMatEigen);
 }
+
+// [[Rcpp::export]]
+NumericMatrix make_symmetric_values_cpp(NumericMatrix mat) {
+    int n = mat.nrow();
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (i != j) {
+                if (mat(i, j) == 0 && mat(j, i) != 0) {
+                    mat(i, j) = mat(j, i);
+                } else if (mat(j, i) == 0 && mat(i, j) != 0) {
+                    mat(j, i) = mat(i, j);
+                }
+            }
+        }
+    }
+
+    return mat;
+}
+
+// [[Rcpp::export]]
+NumericMatrix make_symmetric_zero_cpp(NumericMatrix mat) {
+    int n = mat.nrow();
+    
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (i != j) {
+                if (mat(i, j) == 0 || mat(j, i) == 0) {
+                    mat(i, j) = 0;
+                    mat(j, i) = 0;
+                }
+            }
+        }
+    }
+    
+    return mat;
+}

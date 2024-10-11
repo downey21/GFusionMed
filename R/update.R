@@ -251,7 +251,6 @@ v.updateUndirected <- function(y,X,lambda,delta,Alpha,eta,kappa,pmat,no.de,bCb,n
         A = giveA(Afull,which=addr.inv)
 
         #sample eta
-
         lhr1 = dmvnrm_arma(x = matrix(y,ncol=n),mean=rep(0,n),sigma = giveCov(X[,new.addr,drop=F],rep(lambda,length(new.addr)),kappa),log=TRUE)
         hyper1 = sum(new.eta*log(pmat) + (1-new.eta)*log(1-pmat))
 
@@ -259,9 +258,10 @@ v.updateUndirected <- function(y,X,lambda,delta,Alpha,eta,kappa,pmat,no.de,bCb,n
         hyper2 = sum(eta*log(pmat) + (1-eta)*log(1-pmat))
         lhr = lhr1+hyper1-lhr2-hyper2
 
-
-        if (log(runif(1))<lhr) {eta <- new.eta; A<-A.new}
-
+        if (log(runif(1))<lhr) {
+            eta <- new.eta
+            A <- A.new
+        }
 
         alpha = rep(0,p)
         resid = y
@@ -269,13 +269,15 @@ v.updateUndirected <- function(y,X,lambda,delta,Alpha,eta,kappa,pmat,no.de,bCb,n
             # sample alpha
             addr = which(eta==1)
             if (length(addr)>0) {
-                Alpha[addr] = rmvnrm_arma(1,prod_cpp(A,t_prod_cpp(X[,addr,drop=F],as.matrix(y))),A/kappa)
+                alpha[addr] = rmvnrm_arma(1,prod_cpp(A,t_prod_cpp(X[,addr,drop=F],as.matrix(y))),A/kappa)
             }
+            Alpha <- alpha
             # sample kappa
             resid = y - prod_cpp(X,as.matrix(alpha))
         }
         kappa = stats::rgamma(1,shape=(n+delta+no.tau-1+no.de+sum(alpha!=0))/2,rate=(lambda +sum(resid^2)+bCb+(lambda +no.tau-1)*sum(alpha^2) )/2)
 
-    } #if (is.move)
+    }
+    
     return(list(eta=eta,kappa=kappa,Alpha=Alpha,is.move=is.move))
 }

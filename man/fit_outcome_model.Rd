@@ -8,9 +8,9 @@ fit_outcome_model(
   input_list,
   lambda = 5,
   delta = 2,
-  burnin.S = 20000,
+  burnin.S = 10000,
   inf.S = 10000,
-  gamma.prob = 0.5,
+  gamma.prob = 0.3,
   seed = 1234,
   model = "normal"
 )

@@ -21,6 +21,14 @@ inverse_cpp <- function(mat) {
     .Call('_GFusionMed_inverse_cpp', PACKAGE = 'GFusionMed', mat)
 }
 
+make_symmetric_values_cpp <- function(mat) {
+    .Call('_GFusionMed_make_symmetric_values_cpp', PACKAGE = 'GFusionMed', mat)
+}
+
+make_symmetric_zero_cpp <- function(mat) {
+    .Call('_GFusionMed_make_symmetric_zero_cpp', PACKAGE = 'GFusionMed', mat)
+}
+
 dmvnrm_arma <- function(x, mean, sigma, logd = FALSE) {
     .Call('_GFusionMed_dmvnrm_arma', PACKAGE = 'GFusionMed', x, mean, sigma, logd)
 }

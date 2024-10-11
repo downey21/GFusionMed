@@ -2,8 +2,16 @@
 #'
 #' Constructs a multi-layered graphical model to capture both undirected (within-layer) and directed (between-layer) relationships in multi-omics data. By default, multiple CPU cores are used. It is recommended to allocate as many cores as the number of layers in the input.
 #' @export
-fit_structure_model <- function(input_list, lambda = 5, delta = 2, burnin.S = 20000, inf.S = 10000, eta.prob = 0.5, gamma.prob = 0.5, seed = 1234, cores = parallel::detectCores() - 1, parallel = FALSE) {
+fit_structure_model <- function(input_list, lambda = 5, delta = 2, burnin.S = 10000, inf.S = 10000, eta.prob = 0.3, gamma.prob = 0.3, seed = 1234, cores = parallel::detectCores() - 1, parallel = FALSE, method = "AND") {
         
+        if (parallel) {
+            if (!(method %in% c("AND", "OR"))) {
+                stop("method must be either AND or OR.")
+            }
+        } else {
+            method <- NULL
+        }
+
         set.seed(seed, "L'Ecuyer")
 
         if (!is.list(input_list)) {
@@ -44,24 +52,29 @@ fit_structure_model <- function(input_list, lambda = 5, delta = 2, burnin.S = 20
             palist[[i]] <- 1:addr[i-1]
         }
 
-        if (parallel == TRUE && cores > q) {
+        if (parallel == TRUE && cores >= (2 * q)) {
 
             if (cores < 1) {
                 stop("The number of cores must be at least 1.")
             }
 
+            inner_cores <- cores %/% q
+
+            cores <- q
+
             fit_structure_model_node_task <- function(t) {
                 result <- fit_structure_model_node_temp(
-                    v = t,
-                    chlist = chlist,
-                    palist = palist,
+                    v.ch = chlist[[t]],
+                    v.pa = palist[[t]],
                     Y = X,
                     lambda = lambda,
                     delta = delta,
                     burnin.S = burnin.S,
                     inf.S = inf.S,
                     eta.prob = eta.prob,
-                    gamma.prob = gamma.prob
+                    gamma.prob = gamma.prob,
+                    inner_cores = inner_cores,
+                    method = method
                 )
 
                 return(result)
@@ -76,9 +89,10 @@ fit_structure_model <- function(input_list, lambda = 5, delta = 2, burnin.S = 20
                     ),
                 envir = environment()
             )
-
-            result <- parallel::parLapply(cl, 1:ncol(X), fit_structure_model_node_task)
+        
+            result <- parallel::parLapply(cl, 1:q, fit_structure_model_node_task)
             parallel::stopCluster(cl)
+
 
             attr(result, "meta") <-
                 list(
@@ -268,25 +282,21 @@ fit_structure_model_temp <- function(v.ch,v.pa,Y,eta.prob=0.3,gamma.prob=0.3,lam
 #' Internal function
 #'
 #' This is an internal function that is not exported.
-fit_structure_model_node_temp <- function(v,chlist,palist,Y,eta.prob=0.3,gamma.prob=0.3,lambda,delta,burnin.S,inf.S) {
+fit_structure_model_node_temp <- function(v.ch,v.pa,Y,eta.prob=0.3,gamma.prob=0.3,lambda,delta,burnin.S,inf.S, inner_cores = inner_cores, method = method) {
     # This function performs node-wise BANS regression model
     # Input
     # - v : target indice for node-wise regression
     # - chlist : list for components
     # - palist : list for parent set for each component
     # - Y : nxp data matrix
-
-    t = which(unlist(lapply(chlist, function(x) v %in% x)))
-    v.ch = chlist[[t]]
     stopifnot(length(v.ch)>1)
-    v.pa = palist[[t]]
     S = burnin.S + inf.S
     dat.C = scale(Y[,v.ch,drop=F])
     n = nrow(dat.C)
     p = ncol(dat.C)
-    v.addr = match(v,v.ch)
-    pmat = rep(0.2,p-1)
-
+    pmat = matrix(0.2,ncol(dat.C),ncol(dat.C))
+    diag(pmat) = 0
+    
     if (is.null(v.pa)) {
         Gamma.list = NULL
         B.list=NULL
@@ -297,81 +307,191 @@ fit_structure_model_node_temp <- function(v,chlist,palist,Y,eta.prob=0.3,gamma.p
         CC = matrix(1/lambda,ncol=pP,nrow=p)# hyper parameter for b for nonzero gamma
         qmat = matrix(0.1,ncol(dat.C),ncol(dat.P))
     }
-    eta.list =A.list= matrix(0,nrow=inf.S,ncol=p)
-    kappa.list= rep(0,inf.S)
 
-    ###########################################
-    ####### Initialize all parameters #########
-    ###########################################
-    # eta (indicators for alpha) #
-    eta = rep(0,p)
-    eta[-v.addr] = rbinom(p-1,size=1,prob=eta.prob)
-    # Gamma (indicators for b)#
+    eta.list = A.list = array(0,dim=c(p,p,inf.S))
+    kappa.list = matrix(0,nrow=inf.S,ncol=p)
+
+    # eta.list = A.list= matrix(0,nrow=inf.S,ncol=p)
+    # kappa.list= rep(0,inf.S)
+    
+    # initialization
+
+    # eta (indicators for alpha)
+    w.upper = which(upper.tri(diag(p)))
+    eta = matrix(0,p,p)
+    eta[w.upper] = rbinom(length(w.upper),size=1,prob=eta.prob)
+    eta = eta + t_cpp(eta)
+    diag(eta) = 0
+    # Gamma (indicators for b)
     if (!is.null(v.pa)) {Gamma = matrix(rbinom(p*pP,size=1,prob=gamma.prob),nrow=p,ncol=pP)}
-    # A (pxp alpha)$
-    A = rep(0,p)
-    A[-v.addr] = pmat*eta[-v.addr]
-    # B (pxpP b) #
+    # A (pxp alpha)
+    A = pmat*eta
+    # B (pxpP b)
     if (!is.null(v.pa)) {B = qmat*Gamma}
-    # kappa (px1 vector) #
-    kappa = 1
+    # kappa (px1 vector)
+    kappa = rep(1,p)
 
     s = 0
 
-    while (s<S) {
-        s = s+1
-        # if (s%%100==0) cat("no. of samples=",s,"\n")
-        # Update eta, A, kappa
+    undirected_loop <- function(v.addr) {
+
         if (!is.null(v.pa)) {
             tempDat = dat.C - prod_t_cpp(dat.P,B)
             no.de = sum(B[v.addr,]!=0)
             bCb = sum(B[v.addr,]^2/CC[v.addr,])
         } else{tempDat=dat.C
-            no.de=bCb = rep(0,p)
+        no.de=bCb = rep(0,p)
         }
-        up = v.updateUndirected(y=tempDat[,v.addr],X=tempDat[,-v.addr],lambda=lambda,delta=delta,Alpha=A[-v.addr],eta=eta[-v.addr],kappa=kappa,pmat=pmat,no.de=no.de,bCb=bCb,no.tau=p)
-        if (up$is.move) {
-            eta[-v.addr]=up$eta
-            kappa = up$kappa
-            A[-v.addr] =up$Alpha
+
+        up = v.updateUndirected(y=tempDat[,v.addr],X=tempDat[,-v.addr],lambda=lambda,delta=delta,Alpha=A[v.addr,-v.addr],eta=eta[v.addr,-v.addr],kappa=kappa[v.addr],pmat=rep(0.2,p-1),no.de=no.de,bCb=bCb,no.tau=p)
+        
+        eta_temp = rep(0,p)
+        eta_temp[-v.addr] = up$eta
+        up$eta = eta_temp
+
+        A_temp = rep(0, p)
+        eta_temp[-v.addr] = up$Alpha
+        up$Alpha = eta_temp
+
+        return(up)   
+    }
+
+    undirected_update_matrices <- function(eta, kappa, A, result) {
+        for (i in 1:length(result)) {
+            if (result[[i]]$is.move) {
+                eta[i, ] <- result[[i]]$eta
+                kappa[i] <- result[[i]]$kappa
+                A[i, ] <- result[[i]]$Alpha
+            }
         }
+        return(list(eta = eta, kappa = kappa, A = A))
+    }
+
+    cl_inner <- parallel::makeCluster(inner_cores)
+
+    if (!is.null(v.pa)) {
+
+        parallel::clusterExport(
+            cl_inner,
+            varlist = c(
+                "v.pa", "dat.C", "dat.P", "CC", "p", "lambda", "delta", "A", "eta", "kappa", "B"
+                ),
+            envir = environment()
+        )
+
+    } else {
+
+        parallel::clusterExport(
+            cl_inner,
+            varlist = c(
+                "v.pa", "dat.C", "p", "lambda", "delta", "A", "eta", "kappa"
+                ),
+            envir = environment()
+        )
+
+    }
+
+    while (s<S) {
+        s = s+1
+        # if (s%%100==0) cat("no. of samples=",s,"\n")
+        # Update eta, A, kappa
+        result <- parallel::parLapply(cl_inner, 1:p, undirected_loop)
+        updated_values <- undirected_update_matrices(eta, kappa, A, result)
+
+        eta <- updated_values$eta
+        kappa <- updated_values$kappa
+        A <- updated_values$A
+
+        eta <- eta + t_cpp(eta)
+
+        if (method == "OR") {
+
+            eta <- ifelse(eta > 0, 1, 0)
+            A <- make_symmetric_values_cpp(A)
+
+        } else {
+
+            eta <- ifelse(eta == 2, 1, 0)
+            A <- make_symmetric_zero_cpp(A)
+
+        }
+
+        for (v in sample(1:p)) {
+
+            if (!is.null(v.pa)) {
+                # Update Gamma, B, kappa
+                v.ne = which(A[v,]!=0)
+                v.ne.l = length(v.ne)
+                vv.ne = c(v,v.ne)
+                l.cl = length(vv.ne)
+                if (v.ne.l>0) {
+                    alpha = A[v,v.ne,drop=F]
+                    y = c(dat.C[,v] - prod(dat.C[,v.ne,drop=F],alpha))
+                    X = sapply(alpha,function(k) -k*dat.P,simplify=F)
+                    X = cbind(dat.P,do.call(cbind,X))
+                } else {
+                    y = dat.C[,v]
+                    X = dat.P
+                    alpha = 0
+                }
+                CCinv = (1/CC[vv.ne,,drop=F]) * kappa[vv.ne]
+                
+                if (!all(dim(CCinv)==c(1,1))) {
+                    if (ncol(CCinv)==1) {
+                        CCinv = diag(c(CCinv))
+                    } else {
+                        CCinv = as.matrix(Matrix::bdiag(sapply(1:l.cl,function(x)diag(CCinv[x,]),simplify=F)))
+                    }
+                }
+                
+                tempB = B[vv.ne,,drop=F]
+                tempGamma = Gamma[vv.ne,,drop=F]
+                tempqmat = qmat[vv.ne,,drop=F]
+                up = updateDirected(y=y,X=X,lambda=lambda,delta=delta,CCinv=CCinv,B=tempB,Gamma=tempGamma,kappa=kappa[v],qmat=tempqmat,v.no.ue =v.ne.l,v.aa=sum(alpha^2),no.tau=p)
+                if (up$is.move){
+                    Gamma[vv.ne,] = up$Gamma
+                    kappa[v] = up$kappa
+                    B[vv.ne,] = up$B
+                }
+            }
+        }
+
         if (!is.null(v.pa)) {
-            # Update Gamma, B, kappa
-            v.ne = which(A!=0)
-            v.ne.l = length(v.ne)
-            vv.ne = c(v.addr,v.ne)
-            l.cl = length(vv.ne)
-            if (v.ne.l>0) {
-                alpha = A[v.ne,drop=F]
-                y = c(dat.C[,v.addr] - prod(dat.C[,v.ne,drop=F],alpha))
-                X = sapply(alpha,function(k) -k*dat.P,simplify=F)
-                X = cbind(dat.P,do.call(cbind,X))
-            }else{
-                y = dat.C[,v.addr]
-                X = dat.P
-                alpha=0
-            }
-            CCinv = (1/CC[vv.ne,,drop=F]) * kappa
-            CCinv = as.matrix(bdiag(sapply(1:l.cl,function(x)diag(CCinv[x,]),simplify=F)))
-            tempB = B[vv.ne,,drop=F]
-            tempGamma = Gamma[vv.ne,,drop=F]
-            tempqmat = qmat[vv.ne,,drop=F]
-            up = updateDirected(y=y,X=X,lambda=lambda,delta=delta,CCinv=CCinv,B=tempB,Gamma=tempGamma,kappa=kappa,qmat=tempqmat,v.no.ue =v.ne.l,v.aa=sum(alpha^2),no.tau=p)
-            if (up$is.move){
-                Gamma[vv.ne,] = up$Gamma
-                kappa= up$kappa
-                B[vv.ne,] = up$B
-            }
-        } #(!is.null(v.pa))
-        ### Store values
+
+            parallel::clusterExport(
+                cl_inner,
+                varlist = c(
+                    "A", "eta", "kappa", "B"
+                    ),
+                envir = environment()
+            )
+
+        } else {
+
+            parallel::clusterExport(
+                cl_inner,
+                varlist = c(
+                    "A", "eta", "kappa"
+                    ),
+                envir = environment()
+            )
+
+        }
+
         if (s>burnin.S) {
             ss = s - burnin.S
-            if (!is.null(v.pa)) {Gamma.list[,,ss] = Gamma; B.list[,,ss]=B}
-            eta.list[ss,] = eta
-            A.list[ss,] = A
-            kappa.list[ss] = kappa
+            if (!is.null(v.pa)) {
+                Gamma.list[,,ss] = Gamma
+                B.list[,,ss]=B
+            }
+            eta.list[,,ss] = eta
+            A.list[,,ss] = A
+            kappa.list[ss,] = kappa
         }
-    }#while (s<S)
+    }
+
+    parallel::stopCluster(cl_inner)
+
     return(list(Gamma=Gamma.list,eta=eta.list,A=A.list,B=B.list,kappa=kappa.list))
 }
 
@@ -379,7 +499,7 @@ fit_structure_model_node_temp <- function(v,chlist,palist,Y,eta.prob=0.3,gamma.p
 #'
 #' Fits an outcome model to study the relationships between omics data and a specific outcome (e.g., drug response), compatible with various types of outcomes (continuous, binary, ordinal). Set model = "normal" if the data is continuous, and set model = "probit" otherwise.
 #' @export
-fit_outcome_model <- function(input_list, lambda = 5, delta = 2, burnin.S = 20000, inf.S = 10000, gamma.prob = 0.5, seed = 1234, model = "normal") {
+fit_outcome_model <- function(input_list, lambda = 5, delta = 2, burnin.S = 10000, inf.S = 10000, gamma.prob = 0.3, seed = 1234, model = "normal") {
     
     set.seed(seed)
 
