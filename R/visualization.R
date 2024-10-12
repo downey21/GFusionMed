@@ -1,6 +1,33 @@
-#' Summarize the edge information from fitted result
+#' Summarize the edge information from fitted results
 #'
-#' This function calculates edge strength from the MCMC sampling results.
+#' This function calculates the edge strength from the MCMC sampling results, 
+#' providing a summary of both undirected and directed edges.
+#'
+#' @param x The output from either \code{fit_structure_model()} or 
+#' \code{fit_outcome_model()} from Module 1 of the GFusionMed package.
+#'
+#' @details 
+#' The function summarizes both undirected and directed edges based on the MCMC 
+#' sampling results. It returns a data frame with the start and end nodes of each edge, 
+#' the edge type (either "und" for undirected or "dir" for directed), and the edge strength, 
+#' which reflects the frequency or strength of the inferred relationship across MCMC samples.
+#'
+#' @return 
+#' A data frame with the following columns:
+#' \describe{
+#'   \item{\code{Start}}{The starting node of the edge.}
+#'   \item{\code{End}}{The ending node of the edge.}
+#'   \item{\code{Type}}{The type of edge, either "und" (undirected) or "dir" (directed).}
+#'   \item{\code{Strength}}{The strength of the edge, calculated based on MCMC samples.}
+#' }
+#'
+#' @examples
+#' data(example_result_structure, package = "GFusionMed")
+#' data(example_result_outcome, package = "GFusionMed")
+#'
+#' GFusionMed::edge_summary(example_result_structure)
+#' GFusionMed::edge_summary(example_result_outcome)
+#' 
 #' @export
 edge_summary <- function(x, ...) {
     UseMethod("edge_summary")
@@ -191,8 +218,77 @@ edge_summary.outcome <- function(result_outcome, exposure = NULL) {
 #' Network Visualization
 #'
 #' Visualizes the network, where edge transparency reflects the strength of inferred relationships.
+#' Depending on the input, the visualization can focus on either the multi-layered structure, 
+#' the outcome model, or both. It also supports focused visualization for a specific exposure variable.
+#'
+#' @param result_structure The output from \code{fit_structure_model()} (Module 1 of GFusionMed). 
+#' If provided, the network visualization will reflect the learned multi-layered structure.
+#' @param result_outcome The output from \code{fit_outcome_model()} (Module 1 of GFusionMed). 
+#' If provided, the network visualization will reflect the learned outcome model.
+#' @param exposure An optional character string specifying the exposure variable to focus on. 
+#' If \code{NULL} (default), the entire network is visualized. When a specific exposure is provided, 
+#' the visualization will focus on the pathway from the exposure to the outcome through mediators.
+#' @param shade A logical value indicating whether to dim unrelated variables when focusing on 
+#' a specific exposure. Defaults to \code{TRUE}, meaning unrelated variables are dimmed. If \code{FALSE}, 
+#' unrelated variables are excluded from the visualization entirely. This parameter only applies when 
+#' \code{exposure} is not \code{NULL}.
+#' @param path A character string specifying the directory path where the output PDF file will be saved.
+#' @param file_name A character string specifying the name of the output PDF file (without the ".pdf").
+#' @param width A numeric value specifying the width of the PDF file. Default is 20.
+#' @param height A numeric value specifying the height of the PDF file. Default is 11.
+#' @param vector_layer_color An optional vector specifying the colors for each layer in the network. 
+#' If not provided, default colors will be used.
+#' @param seed An integer value for setting the random seed to ensure reproducibility in node placement.
+#'
+#' @details 
+#' The \code{plot_network()} function creates PDF visualizations of the network, where the edge transparency 
+#' indicates the strength of the inferred relationships. It supports visualizing:
+#' \itemize{
+#'   \item The multi-layered structure network when only \code{result_structure} is provided.
+#'   \item The outcome model network when only \code{result_outcome} is provided.
+#'   \item A combined network of the structure and outcome model when both inputs are provided.
+#' }
+#' If a specific exposure variable is provided, the visualization focuses on the pathway from the exposure 
+#' to the outcome through mediators. The \code{shade} parameter controls whether unrelated variables are 
+#' dimmed (\code{TRUE}) or excluded (\code{FALSE}).
+#'
+#' The output is saved as a PDF file at the specified \code{path} and with the specified \code{file_name}.
+#' No value is returned by the function.
+#'
+#' @return 
+#' This function does not return a value. The visualization is saved as a PDF file.
+#'
+#' @examples
+#' # Structure network visualization
+#' GFusionMed::plot_network(
+#'   result_structure = example_result_structure,
+#'   path = "Set your path", file_name = "plot_network_structure"
+#' )
+#'
+#' # Outcome network visualization
+#' GFusionMed::plot_network(
+#'   result_outcome = example_result_outcome,
+#'   path = "Set your path", file_name = "plot_network_outcome"
+#' )
+#'
+#' # Structure-outcome network visualization
+#' GFusionMed::plot_network(
+#'   result_structure = example_result_structure,
+#'   result_outcome = example_result_outcome, 
+#'   path = "Set your path", file_name = "plot_network_structure_outcome"
+#' )
+#'
+#' # Network visualization for a specific exposure variable
+#' example_exposure <- "mRNA_EGFR"
+#' GFusionMed::plot_network(
+#'   result_structure = example_result_structure,
+#'   result_outcome = example_result_outcome, 
+#'   exposure = example_exposure,
+#'   path = "Set your path", file_name = "plot_network_structure_outcome_exposure"
+#' )
+#'
 #' @export
-plot_network <- function(result_structure = NULL, result_outcome = NULL, exposure = NULL, path, file_name, width = 20, height = 11, vector_layer_color = NULL, seed = 1234) {
+plot_network <- function(result_structure = NULL, result_outcome = NULL, exposure = NULL, shade = TRUE, path, file_name, width = 20, height = 11, vector_layer_color = NULL, seed = 1234) {
 
     if (is.null(result_structure) & !is.null(result_outcome)) {
         return(
@@ -224,6 +320,7 @@ plot_network <- function(result_structure = NULL, result_outcome = NULL, exposur
                 result_structure = result_structure,
                 result_outcome = result_outcome,
                 exposure = exposure,
+                shade = shade,
                 path = path,
                 file_name = file_name,
                 width = width,
@@ -433,17 +530,29 @@ plot_network.outcome <- function(result_outcome, path, file_name, width = 20, he
 #' Internal function
 #'
 #' This is an internal function that is not exported.
-plot_network.structure_outcome <- function(result_structure, result_outcome, exposure, path, file_name, width = 20, height = 11, vector_layer_color = NULL, seed = 1234) {
+plot_network.structure_outcome <- function(result_structure, result_outcome, exposure = NULL, shade = TRUE, path, file_name, width = 20, height = 11, vector_layer_color = NULL, seed = 1234) {
 
     set.seed(seed) 
 
     if (!is.null(exposure)) {
 
-        data_edge <-
-            rbind(
-                GFusionMed::edge_summary(result_outcome),
-                GFusionMed::edge_summary(result_structure, exposure)
-            )
+        if (shade) {
+
+            data_edge <-
+                rbind(
+                    GFusionMed::edge_summary(result_outcome),
+                    GFusionMed::edge_summary(result_structure)
+                )
+
+        } else {
+
+            data_edge <-
+                rbind(
+                    GFusionMed::edge_summary(result_outcome),
+                    GFusionMed::edge_summary(result_structure, exposure)
+                )
+
+        }
 
     } else {
 
@@ -457,7 +566,7 @@ plot_network.structure_outcome <- function(result_structure, result_outcome, exp
 
     vector_layer <- c(attr(data_edge, "info")$structure_layer, attr(data_edge, "info")$outcome_layer)
 
-    if (!is.null(exposure)) {
+    if (!is.null(exposure) && shade == FALSE) {
 
         exposure_layer_part <- strsplit(exposure, "_")[[1]][1]
         exposure_layer <- which(vector_layer == exposure_layer_part)
@@ -494,7 +603,7 @@ plot_network.structure_outcome <- function(result_structure, result_outcome, exp
         vector_layer_color <- assign_colors(vector_layer)
     }
 
-    if (!is.null(exposure)) {
+    if (!is.null(exposure) && shade == FALSE) {
         vector_layer_color_for_legend <- vector_layer_color[exposure_layer:length(vector_layer_color)]
     }
 
@@ -505,6 +614,42 @@ plot_network.structure_outcome <- function(result_structure, result_outcome, exp
         )
 
     node_colors <- setNames(vector_layer_color[node_layer], names(node_layer))
+
+    if (!is.null(exposure) && shade == TRUE) {
+
+        exposure_layer_part <- strsplit(exposure, "_")[[1]][1]
+        exposure_layer <- which(vector_layer == exposure_layer_part)
+
+        if (exposure_layer >= 2) {
+
+            patterns_to_remove <- paste0("^", vector_layer[1:(exposure_layer - 1)], "_")
+
+            for (name in names(node_colors)) {
+                for (pattern in patterns_to_remove) {
+                    if (grepl(pattern, name)) {
+                        node_colors[name] <- adjustcolor(node_colors[name], alpha.f = 0.25)
+                    }
+                }
+            }
+        
+            for (pattern in patterns_to_remove) {
+                data_edge[grepl(pattern, data_edge$Start), "Strength"] <- data_edge[grepl(pattern, data_edge$Start), "Strength"] / 4
+            }
+
+        }
+
+        pattern_for_layer <- paste0("^", vector_layer[exposure_layer], "_")
+    
+        for (name in names(node_colors)) {
+            if (grepl(pattern_for_layer, name) & name != exposure) {
+                node_colors[name] <- adjustcolor(node_colors[name], alpha.f = 0.25)
+            }
+        }
+
+        data_edge[grepl(pattern_for_layer, data_edge$Start) & data_edge$Start != exposure, "Strength"] <- data_edge[grepl(pattern_for_layer, data_edge$Start) & data_edge$Start != exposure, "Strength"] / 4
+        data_edge[grepl(pattern_for_layer, data_edge$Start) & grepl(pattern_for_layer, data_edge$End), "Strength"] <- data_edge[grepl(pattern_for_layer, data_edge$Start) & grepl(pattern_for_layer, data_edge$End), "Strength"] / 4
+
+    }
 
     g <- igraph::graph_from_data_frame(data_edge, directed = TRUE)
     igraph::V(g)$color <- node_colors[igraph::V(g)$name]
@@ -552,7 +697,7 @@ plot_network.structure_outcome <- function(result_structure, result_outcome, exp
                         asp = 0
     )
 
-    if (!is.null(exposure)) {
+    if (!is.null(exposure) && shade == FALSE) {
         legend(
             "bottomright", 
             legend = names(vector_layer_color_for_legend),
@@ -583,6 +728,7 @@ plot_network.structure_outcome <- function(result_structure, result_outcome, exp
 #' Sankey Plot
 #'
 #' Visualizes the network when group information for the variables is available.
+#' 
 #' @export
 plot_sankey <- function(edge_structure, edge_outcome, group_information, vector_layer_color = NULL) {
 

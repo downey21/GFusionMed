@@ -15,6 +15,76 @@ fit_outcome_model(
   model = "normal"
 )
 }
+\arguments{
+\item{input_list}{A list containing multi-omics data and an outcome variable. 
+Each element in the list corresponds to a different omics layer, with the 
+final element representing the outcome. The keys should specify the names of 
+the layers (e.g., "CNA", "mRNA", "Protein") and the outcome (e.g., "Drug").
+Each element must be a tibble or data.frame.}
+
+\item{lambda}{A hyperparameter related to the inverse variance of the variables.}
+
+\item{delta}{A hyperparameter related to the inverse variance of the variables.}
+
+\item{burnin.S}{The number of MCMC samples to discard during the burn-in phase. 
+This phase ensures that the Markov chain reaches a stable distribution.}
+
+\item{inf.S}{The number of MCMC samples to use for posterior inference after 
+the burn-in phase.}
+
+\item{gamma.prob}{A hyperparameter controlling the prior probability for 
+inclusion of between-layer (directed) edges.}
+
+\item{seed}{An integer value to set the random seed for reproducibility.}
+
+\item{model}{A character string specifying the outcome model. Supported values are:
+\describe{
+  \item{\code{"normal"}}{Use this option when the outcome data is continuous.}
+  \item{\code{"probit"}}{Use this option when the outcome is binary or ordinal.}
+}}
+}
+\value{
+A list containing the following elements:
+\describe{
+  \item{\code{Gamma}}{A matrix  representing directed (between-layer) relationships.}
+  \item{\code{B}}{A matrix  representing between-layer effects.}
+  \item{\code{kappa}}{A numeric vector representing the inverse variance over MCMC samples.}
+}
+The output also includes \code{attr()} metadata, which contains:
+\describe{
+  \item{\code{chlist}}{A list of node indices for each layer, including the outcome layer.}
+  \item{\code{palist}}{A list of parent nodes for each layer.}
+  \item{\code{column_name}}{A character vector with the names of columns used in the analysis.}
+  \item{\code{structure_layer}}{A character vector with the names of the omics layers.}
+  \item{\code{outcome_layer}}{A character string with the name of the outcome layer.}
+}
+}
 \description{
-Fits an outcome model to study the relationships between omics data and a specific outcome (e.g., drug response), compatible with various types of outcomes (continuous, binary, ordinal). Set model = "normal" if the data is continuous, and set model = "probit" otherwise.
+Fits an outcome model to study the relationships between omics data and a specific outcome 
+(e.g., drug response), compatible with various types of outcomes (continuous, binary, ordinal). 
+Set \code{model = "normal"} if the data is continuous, and set \code{model = "probit"} otherwise.
+}
+\details{
+This function fits an outcome model to explore the relationship between multi-omics 
+layers and a specific outcome. Depending on the type of outcome data, the user can 
+choose between two models: 
+  \itemize{
+    \item \code{"normal"} for continuous outcomes.
+    \item \code{"probit"} for binary or ordinal outcomes.
+  }
+MCMC sampling is used to estimate model parameters, with a specified number of 
+burn-in samples and posterior samples for inference.
+}
+\examples{
+data(example_data_for_outcome, package = "GFusionMed")
+
+example_result_outcome <- GFusionMed::fit_outcome_model(
+  example_data_for_outcome
+)
+
+}
+\references{
+Ha, Min Jin, Francesco Claudio Stingo, and Veerabhadran Baladandayuthapani. 
+"Bayesian structure learning in multilayered genomic networks." 
+Journal of the American Statistical Association 116.534 (2021)
 }

@@ -7,7 +7,8 @@
 plot_network.structure_outcome(
   result_structure,
   result_outcome,
-  exposure,
+  exposure = NULL,
+  shade = TRUE,
   path,
   file_name,
   width = 20,

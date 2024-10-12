@@ -2,10 +2,38 @@
 % Please edit documentation in R/visualization.R
 \name{edge_summary}
 \alias{edge_summary}
-\title{Summarize the edge information from fitted result}
+\title{Summarize the edge information from fitted results}
 \usage{
 edge_summary(x, ...)
 }
+\arguments{
+\item{x}{The output from either \code{fit_structure_model()} or 
+\code{fit_outcome_model()} from Module 1 of the GFusionMed package.}
+}
+\value{
+A data frame with the following columns:
+\describe{
+  \item{\code{Start}}{The starting node of the edge.}
+  \item{\code{End}}{The ending node of the edge.}
+  \item{\code{Type}}{The type of edge, either "und" (undirected) or "dir" (directed).}
+  \item{\code{Strength}}{The strength of the edge, calculated based on MCMC samples.}
+}
+}
 \description{
-This function calculates edge strength from the MCMC sampling results.
+This function calculates the edge strength from the MCMC sampling results, 
+providing a summary of both undirected and directed edges.
+}
+\details{
+The function summarizes both undirected and directed edges based on the MCMC 
+sampling results. It returns a data frame with the start and end nodes of each edge, 
+the edge type (either "und" for undirected or "dir" for directed), and the edge strength, 
+which reflects the frequency or strength of the inferred relationship across MCMC samples.
+}
+\examples{
+data(example_result_structure, package = "GFusionMed")
+data(example_result_outcome, package = "GFusionMed")
+
+GFusionMed::edge_summary(example_result_structure)
+GFusionMed::edge_summary(example_result_outcome)
+
 }

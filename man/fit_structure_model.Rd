@@ -18,6 +18,93 @@ fit_structure_model(
   method = "AND"
 )
 }
+\arguments{
+\item{input_list}{A list containing multi-omics data. Each element in the 
+list corresponds to a different omics layer, and the keys should specify 
+the layer names (e.g., "CNA", "mRNA", "Protein"). Each element must be a 
+tibble or data.frame.}
+
+\item{lambda}{A hyperparameter related to the inverse variance of the variables.}
+
+\item{delta}{A hyperparameter related to the inverse variance of the variables.}
+
+\item{burnin.S}{The number of MCMC samples to discard during the burn-in phase. 
+This phase ensures that the Markov chain reaches a stable distribution.}
+
+\item{inf.S}{The number of MCMC samples to use for posterior inference after 
+the burn-in phase.}
+
+\item{eta.prob}{A hyperparameter controlling the prior probability for 
+inclusion of within-layer (undirected) edges.}
+
+\item{gamma.prob}{A hyperparameter controlling the prior probability for 
+inclusion of between-layer (directed) edges.}
+
+\item{seed}{An integer value to set the random seed for reproducibility.}
+
+\item{cores}{Number of CPU cores to use for parallel computation. Defaults to 
+the number of available cores minus one.}
+
+\item{parallel}{A logical value indicating whether to perform node-level 
+parallelization. When \code{FALSE}, the function performs parallel computations 
+layer by layer. When \code{TRUE}, it performs node-level parallelization, which 
+is recommended when the number of variables (nodes) is large. This option allows 
+the function to use many cores effectively, but it may result in a lack of 
+symmetry in the covariance matrix.}
+
+\item{method}{A character string specifying the method for ensuring symmetry 
+in the covariance matrix. This is necessary because node-level parallelization 
+may result in asymmetry. Supported methods include \code{"AND"} and \code{"OR"}.
+The \code{"AND"} rule ensures that an edge is included only if both nodes agree, 
+while the \code{"OR"} rule includes an edge if either node suggests it.}
+}
+\value{
+A list of length equal to the number of layers, where each element contains:
+\describe{
+  \item{\code{Gamma}}{A 3D array representing directed (between-layer) relationships.}
+  \item{\code{B}}{A 3D array representing between-layer effects.}
+  \item{\code{eta}}{A 3D array representing undirected (within-layer) relationships.}
+  \item{\code{A}}{A 3D array representing within-layer effects.}
+  \item{\code{kappa}}{An array showing the inverse variance of each variable.}
+}
+The output also includes \code{attr()} metadata, which contains:
+\describe{
+  \item{\code{chlist}}{A list specifying node indices for each layer.}
+  \item{\code{palist}}{A list specifying parent nodes for each layer.}
+  \item{\code{column_name}}{A character vector with the names of columns used in the analysis.}
+  \item{\code{structure_layer}}{A character vector with the names of layers.}
+}
+}
 \description{
-Constructs a multi-layered graphical model to capture both undirected (within-layer) and directed (between-layer) relationships in multi-omics data. By default, multiple CPU cores are used. It is recommended to allocate as many cores as the number of layers in the input.
+Constructs a multi-layered graphical model to capture both undirected 
+(within-layer) and directed (between-layer) relationships in multi-omics data.
+}
+\details{
+This function constructs a multi-layered graphical model, where within-layer 
+dependencies are modeled as undirected relationships (using \code{eta} and \code{A}), 
+and between-layer dependencies are modeled as directed relationships (using 
+\code{Gamma} and \code{B}). The function supports multiple layers, such as 
+CNA, mRNA, and protein data. MCMC sampling is used to estimate the model parameters, 
+with a specified number of burn-in samples and posterior samples for inference. 
+Parallel computation is supported to speed up the learning process, either by layer 
+or by node.
+}
+\examples{
+data(example_data_for_structure, package = "GFusionMed")
+
+# Layer-wise parallel computation
+example_result_structure <- GFusionMed::fit_structure_model(
+  example_data_for_structure, cores = 3
+)
+
+# Node-wise parallel computation
+example_result_structure <- GFusionMed::fit_structure_model(
+  example_data_for_structure, cores = 24, parallel = TRUE
+)
+
+}
+\references{
+Ha, Min Jin, Francesco Claudio Stingo, and Veerabhadran Baladandayuthapani. 
+"Bayesian structure learning in multilayered genomic networks." 
+Journal of the American Statistical Association 116.534 (2021)
 }

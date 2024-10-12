@@ -1,3 +1,15 @@
+---
+title: "GFusionMed"
+author: "Dahun Seo"
+output: 
+  rmarkdown::html_vignette:
+    css: styles.css
+vignette: >
+  %\VignetteIndexEntry{GFusionMed}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
 # GFusionMed: Graphical Fusion and Mediation in Pharmaco-omics
 
 ## Overview
@@ -15,7 +27,7 @@ these layers mediate pharmacological responses. By simplifying the implementatio
 sophisticated techniques, **`GFusionMed`** aims to accelerate discoveries in
 the field of pharmaco-omics.
 
-![](./application/result_analysis/fig1.png)
+![](../application/result_analysis/fig1.png)
 
 **Module 1: Graphical Data Fusion**
 
@@ -47,13 +59,13 @@ the field of pharmaco-omics.
 
 ## Installation
 
-```r
+```{r, eval = FALSE}
 devtools::install_github("downey21/GFusionMed", build_vignettes = TRUE)
 ```
 
 ## Usage
 
-```r
+```{r, eval = FALSE}
 # load package
 library(GFusionMed)
 
@@ -150,7 +162,7 @@ Additionally, we filtered the drug response data to include responses
 for six specific drugs. The complete analysis process, including the
 code, is provided below.
 
-```r
+```{r, eval = FALSE}
 # install.packages('BiocManager')
 # BiocManager::install('depmap')
 
@@ -290,7 +302,7 @@ shown below. The **`data_for_structure`** variable is assigned the input for
 structure learning, and the **`data_for_outcome`** variable is assigned the
 input for outcome learning.
 
-```r
+```{r, eval = FALSE}
 str(data_for_structure)
 #> List of 3
 #>  $ CNA    : tibble [105 × 5] (S3: tbl_df/tbl/data.frame)
@@ -313,7 +325,7 @@ str(data_for_structure)
 #>   ..$ SRC  : num [1:105] 0.5985 0.0498 -0.3679 -0.1008 0.2671 ...
 ```
 
-```r
+```{r, eval = FALSE}
 str(data_for_outcome)
 #> List of 4
 #>  $ CNA    : tibble [104 × 5] (S3: tbl_df/tbl/data.frame)
@@ -345,11 +357,11 @@ this example, since there are 3 structure layers, 3 cores have been
 allocated. For convenience, the output has been saved as an **`RData`**
 file.
 
-```r
+```{r, eval = FALSE}
 path_result <- "./application/result"
 ```
 
-```r
+```{r, eval = FALSE}
 result_fit <- GFusionMed::fit_structure_model(data_for_structure,
     cores = 3)
 save(result_fit, file = paste0(path_result, "/fit_structure.RData"))
@@ -367,7 +379,7 @@ non-zero MCMC samples, with stronger edges indicating higher
 proportions. The edge information can be accessed using the
 **`edge_summary`** function in **`GFusionMed`**.
 
-```r
+```{r, eval = FALSE}
 path_result <- "./application/result"
 path_result_analysis <- "./application/result_analysis"
 
@@ -380,31 +392,31 @@ result_outcome <- result_fit
 
 **Multi-omics structure learning**
 
-```r
+```{r, eval = FALSE}
 GFusionMed::plot_network(result_structure = result_structure,
     path = path_result_analysis, file_name = "plot_network_structure")
 ```
 
-![](./application/result_analysis/plot_network_structure_1.png)
+![](../application/result_analysis/plot_network_structure_1.png)
 
 **Outcome model learning**
 
-```r
+```{r, eval = FALSE}
 GFusionMed::plot_network(result_outcome = result_outcome,
     path = path_result_analysis, file_name = "plot_network_outcome")
 ```
 
-![](./application/result_analysis/plot_network_outcome_1.png)
+![](../application/result_analysis/plot_network_outcome_1.png)
 
 **Graphical Data Fusion**
 
-```r
+```{r, eval = FALSE}
 GFusionMed::plot_network(result_structure = result_structure,
     result_outcome = result_outcome, path = path_result_analysis,
     file_name = "plot_network_structure_outcome")
 ```
 
-![](./application/result_analysis/plot_network_structure_outcome_1.png)
+![](../application/result_analysis/plot_network_structure_outcome_1.png)
 
 ## **`GFusionMed`** Module 2: Mediation Analysis
 
@@ -427,7 +439,7 @@ mediation effect between the exposure and the mediator, and IEC
 (indirect effect from within-layer correlation), capturing mediation
 effects driven by correlations within the same omics layer.
 
-```r
+```{r, eval = FALSE}
 mediation_analysis <- GFusionMed::perform_mediation_analysis(result_structure,
     result_outcome)
 
@@ -444,11 +456,11 @@ easily performed by specifying the **`exposure`** argument in the
 **`perform_mediation_analysis`** and **`plot_network`** functions in
 **`GFusionMed`**.
 
-```r
+```{r, eval = FALSE}
 exposure <- "mRNA_EGFR"
 ```
 
-```r
+```{r, eval = FALSE}
 RTK_erlotinib_mRNA_EGFR <- GFusionMed::perform_mediation_analysis(result_structure,
     result_outcome, exposure)
 
@@ -461,10 +473,10 @@ print(RTK_erlotinib_mRNA_EGFR)
 #> 5   Protein_SRC   -1.84e-06   2e-04    3.47e-06  0.0017    -5.3e-06 0.0018
 ```
 
-```r
+```{r, eval = FALSE}
 GFusionMed::plot_network(result_structure = result_structure,
     result_outcome = result_outcome, exposure = exposure,
     path = path_result_analysis, file_name = "plot_network_structure_outcome_exposure")
 ```
 
-![](./application/result_analysis/plot_network_structure_outcome_exposure_1.png)
+![](../application/result_analysis/plot_network_structure_outcome_exposure_1.png)

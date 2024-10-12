@@ -1,6 +1,82 @@
 #' Multi-omics structure learning
 #'
-#' Constructs a multi-layered graphical model to capture both undirected (within-layer) and directed (between-layer) relationships in multi-omics data. By default, multiple CPU cores are used. It is recommended to allocate as many cores as the number of layers in the input.
+#' Constructs a multi-layered graphical model to capture both undirected 
+#' (within-layer) and directed (between-layer) relationships in multi-omics data.
+#'
+#' @param input_list A list containing multi-omics data. Each element in the 
+#' list corresponds to a different omics layer, and the keys should specify 
+#' the layer names (e.g., "CNA", "mRNA", "Protein"). Each element must be a 
+#' tibble or data.frame.
+#' @param lambda A hyperparameter related to the inverse variance of the variables.
+#' @param delta A hyperparameter related to the inverse variance of the variables.
+#' @param burnin.S The number of MCMC samples to discard during the burn-in phase. 
+#' This phase ensures that the Markov chain reaches a stable distribution.
+#' @param inf.S The number of MCMC samples to use for posterior inference after 
+#' the burn-in phase.
+#' @param eta.prob A hyperparameter controlling the prior probability for 
+#' inclusion of within-layer (undirected) edges.
+#' @param gamma.prob A hyperparameter controlling the prior probability for 
+#' inclusion of between-layer (directed) edges.
+#' @param seed An integer value to set the random seed for reproducibility.
+#' @param cores Number of CPU cores to use for parallel computation. Defaults to 
+#' the number of available cores minus one.
+#' @param parallel A logical value indicating whether to perform node-level 
+#' parallelization. When \code{FALSE}, the function performs parallel computations 
+#' layer by layer. When \code{TRUE}, it performs node-level parallelization, which 
+#' is recommended when the number of variables (nodes) is large. This option allows 
+#' the function to use many cores effectively, but it may result in a lack of 
+#' symmetry in the covariance matrix. 
+#' @param method A character string specifying the method for ensuring symmetry 
+#' in the covariance matrix. This is necessary because node-level parallelization 
+#' may result in asymmetry. Supported methods include \code{"AND"} and \code{"OR"}.
+#' The \code{"AND"} rule ensures that an edge is included only if both nodes agree, 
+#' while the \code{"OR"} rule includes an edge if either node suggests it.
+#' 
+#' @details 
+#' This function constructs a multi-layered graphical model, where within-layer 
+#' dependencies are modeled as undirected relationships (using \code{eta} and \code{A}), 
+#' and between-layer dependencies are modeled as directed relationships (using 
+#' \code{Gamma} and \code{B}). The function supports multiple layers, such as 
+#' CNA, mRNA, and protein data. MCMC sampling is used to estimate the model parameters, 
+#' with a specified number of burn-in samples and posterior samples for inference. 
+#' Parallel computation is supported to speed up the learning process, either by layer 
+#' or by node.
+#' 
+#' @return 
+#' A list of length equal to the number of layers, where each element contains:
+#' \describe{
+#'   \item{\code{Gamma}}{A 3D array representing directed (between-layer) relationships.}
+#'   \item{\code{B}}{A 3D array representing between-layer effects.}
+#'   \item{\code{eta}}{A 3D array representing undirected (within-layer) relationships.}
+#'   \item{\code{A}}{A 3D array representing within-layer effects.}
+#'   \item{\code{kappa}}{An array showing the inverse variance of each variable.}
+#' }
+#' The output also includes \code{attr()} metadata, which contains:
+#' \describe{
+#'   \item{\code{chlist}}{A list specifying node indices for each layer.}
+#'   \item{\code{palist}}{A list specifying parent nodes for each layer.}
+#'   \item{\code{column_name}}{A character vector with the names of columns used in the analysis.}
+#'   \item{\code{structure_layer}}{A character vector with the names of layers.}
+#' }
+#'
+#' @examples
+#' data(example_data_for_structure, package = "GFusionMed")
+#'
+#' # Layer-wise parallel computation
+#' example_result_structure <- GFusionMed::fit_structure_model(
+#'   example_data_for_structure, cores = 3
+#' )
+#'
+#' # Node-wise parallel computation
+#' example_result_structure <- GFusionMed::fit_structure_model(
+#'   example_data_for_structure, cores = 24, parallel = TRUE
+#' )
+#'
+#' @references 
+#' Ha, Min Jin, Francesco Claudio Stingo, and Veerabhadran Baladandayuthapani. 
+#' "Bayesian structure learning in multilayered genomic networks." 
+#' Journal of the American Statistical Association 116.534 (2021)
+#'
 #' @export
 fit_structure_model <- function(input_list, lambda = 5, delta = 2, burnin.S = 10000, inf.S = 10000, eta.prob = 0.3, gamma.prob = 0.3, seed = 1234, cores = parallel::detectCores() - 1, parallel = FALSE, method = "AND") {
         
@@ -497,7 +573,69 @@ fit_structure_model_node_temp <- function(v.ch,v.pa,Y,eta.prob=0.3,gamma.prob=0.
 
 #' Outcome model learning
 #'
-#' Fits an outcome model to study the relationships between omics data and a specific outcome (e.g., drug response), compatible with various types of outcomes (continuous, binary, ordinal). Set model = "normal" if the data is continuous, and set model = "probit" otherwise.
+#' Fits an outcome model to study the relationships between omics data and a specific outcome 
+#' (e.g., drug response), compatible with various types of outcomes (continuous, binary, ordinal). 
+#' Set \code{model = "normal"} if the data is continuous, and set \code{model = "probit"} otherwise.
+#' 
+#' @param input_list A list containing multi-omics data and an outcome variable. 
+#' Each element in the list corresponds to a different omics layer, with the 
+#' final element representing the outcome. The keys should specify the names of 
+#' the layers (e.g., "CNA", "mRNA", "Protein") and the outcome (e.g., "Drug").
+#' Each element must be a tibble or data.frame.
+#' @param lambda A hyperparameter related to the inverse variance of the variables.
+#' @param delta A hyperparameter related to the inverse variance of the variables.
+#' @param burnin.S The number of MCMC samples to discard during the burn-in phase. 
+#' This phase ensures that the Markov chain reaches a stable distribution.
+#' @param inf.S The number of MCMC samples to use for posterior inference after 
+#' the burn-in phase.
+#' @param gamma.prob A hyperparameter controlling the prior probability for 
+#' inclusion of between-layer (directed) edges.
+#' @param seed An integer value to set the random seed for reproducibility.
+#' @param model A character string specifying the outcome model. Supported values are:
+#'   \describe{
+#'     \item{\code{"normal"}}{Use this option when the outcome data is continuous.}
+#'     \item{\code{"probit"}}{Use this option when the outcome is binary or ordinal.}
+#'   } 
+#' 
+#' @details
+#' This function fits an outcome model to explore the relationship between multi-omics 
+#' layers and a specific outcome. Depending on the type of outcome data, the user can 
+#' choose between two models: 
+#'   \itemize{
+#'     \item \code{"normal"} for continuous outcomes.
+#'     \item \code{"probit"} for binary or ordinal outcomes.
+#'   }
+#' MCMC sampling is used to estimate model parameters, with a specified number of 
+#' burn-in samples and posterior samples for inference.
+#' 
+#' @return 
+#' A list containing the following elements:
+#' \describe{
+#'   \item{\code{Gamma}}{A matrix  representing directed (between-layer) relationships.}
+#'   \item{\code{B}}{A matrix  representing between-layer effects.}
+#'   \item{\code{kappa}}{A numeric vector representing the inverse variance over MCMC samples.}
+#' }
+#' The output also includes \code{attr()} metadata, which contains:
+#' \describe{
+#'   \item{\code{chlist}}{A list of node indices for each layer, including the outcome layer.}
+#'   \item{\code{palist}}{A list of parent nodes for each layer.}
+#'   \item{\code{column_name}}{A character vector with the names of columns used in the analysis.}
+#'   \item{\code{structure_layer}}{A character vector with the names of the omics layers.}
+#'   \item{\code{outcome_layer}}{A character string with the name of the outcome layer.}
+#' }
+#' 
+#' @examples
+#' data(example_data_for_outcome, package = "GFusionMed")
+#'
+#' example_result_outcome <- GFusionMed::fit_outcome_model(
+#'   example_data_for_outcome
+#' )
+#'
+#' @references 
+#' Ha, Min Jin, Francesco Claudio Stingo, and Veerabhadran Baladandayuthapani. 
+#' "Bayesian structure learning in multilayered genomic networks." 
+#' Journal of the American Statistical Association 116.534 (2021)
+#' 
 #' @export
 fit_outcome_model <- function(input_list, lambda = 5, delta = 2, burnin.S = 10000, inf.S = 10000, gamma.prob = 0.3, seed = 1234, model = "normal") {
     

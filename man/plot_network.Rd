@@ -8,6 +8,7 @@ plot_network(
   result_structure = NULL,
   result_outcome = NULL,
   exposure = NULL,
+  shade = TRUE,
   path,
   file_name,
   width = 20,
@@ -16,6 +17,85 @@ plot_network(
   seed = 1234
 )
 }
+\arguments{
+\item{result_structure}{The output from \code{fit_structure_model()} (Module 1 of GFusionMed). 
+If provided, the network visualization will reflect the learned multi-layered structure.}
+
+\item{result_outcome}{The output from \code{fit_outcome_model()} (Module 1 of GFusionMed). 
+If provided, the network visualization will reflect the learned outcome model.}
+
+\item{exposure}{An optional character string specifying the exposure variable to focus on. 
+If \code{NULL} (default), the entire network is visualized. When a specific exposure is provided, 
+the visualization will focus on the pathway from the exposure to the outcome through mediators.}
+
+\item{shade}{A logical value indicating whether to dim unrelated variables when focusing on 
+a specific exposure. Defaults to \code{TRUE}, meaning unrelated variables are dimmed. If \code{FALSE}, 
+unrelated variables are excluded from the visualization entirely. This parameter only applies when 
+\code{exposure} is not \code{NULL}.}
+
+\item{path}{A character string specifying the directory path where the output PDF file will be saved.}
+
+\item{file_name}{A character string specifying the name of the output PDF file (without the ".pdf").}
+
+\item{width}{A numeric value specifying the width of the PDF file. Default is 20.}
+
+\item{height}{A numeric value specifying the height of the PDF file. Default is 11.}
+
+\item{vector_layer_color}{An optional vector specifying the colors for each layer in the network. 
+If not provided, default colors will be used.}
+
+\item{seed}{An integer value for setting the random seed to ensure reproducibility in node placement.}
+}
+\value{
+This function does not return a value. The visualization is saved as a PDF file.
+}
 \description{
 Visualizes the network, where edge transparency reflects the strength of inferred relationships.
+Depending on the input, the visualization can focus on either the multi-layered structure, 
+the outcome model, or both. It also supports focused visualization for a specific exposure variable.
+}
+\details{
+The \code{plot_network()} function creates PDF visualizations of the network, where the edge transparency 
+indicates the strength of the inferred relationships. It supports visualizing:
+\itemize{
+  \item The multi-layered structure network when only \code{result_structure} is provided.
+  \item The outcome model network when only \code{result_outcome} is provided.
+  \item A combined network of the structure and outcome model when both inputs are provided.
+}
+If a specific exposure variable is provided, the visualization focuses on the pathway from the exposure 
+to the outcome through mediators. The \code{shade} parameter controls whether unrelated variables are 
+dimmed (\code{TRUE}) or excluded (\code{FALSE}).
+
+The output is saved as a PDF file at the specified \code{path} and with the specified \code{file_name}.
+No value is returned by the function.
+}
+\examples{
+# Structure network visualization
+GFusionMed::plot_network(
+  result_structure = example_result_structure,
+  path = "Set your path", file_name = "plot_network_structure"
+)
+
+# Outcome network visualization
+GFusionMed::plot_network(
+  result_outcome = example_result_outcome,
+  path = "Set your path", file_name = "plot_network_outcome"
+)
+
+# Structure-outcome network visualization
+GFusionMed::plot_network(
+  result_structure = example_result_structure,
+  result_outcome = example_result_outcome, 
+  path = "Set your path", file_name = "plot_network_structure_outcome"
+)
+
+# Network visualization for a specific exposure variable
+example_exposure <- "mRNA_EGFR"
+GFusionMed::plot_network(
+  result_structure = example_result_structure,
+  result_outcome = example_result_outcome, 
+  exposure = example_exposure,
+  path = "Set your path", file_name = "plot_network_structure_outcome_exposure"
+)
+
 }

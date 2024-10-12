@@ -52,3 +52,12 @@ GFusionMed::plot_network(
     path = path_result_analysis,
     file_name = "plot_network_structure_outcome_exposure_1"
 )
+
+GFusionMed::plot_network(
+    result_structure = result_structure,
+    result_outcome = result_outcome,
+    exposure = exposure,
+    shade = FALSE,
+    path = path_result_analysis,
+    file_name = "plot_network_structure_outcome_exposure_non_shade_1"
+)
