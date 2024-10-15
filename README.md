@@ -34,6 +34,9 @@ the field of pharmaco-omics.
     **`fit_outcome_model`** are used to generate a network plot in **`.pdf`**
     format, providing a clear visual representation of the most
     important interactions.
+-   **`plot_sankey`**: Creates a Sankey diagram to visualize the flow and relationships between groups of variables across layers.
+    This function requires group information for the variables, ensuring all variables are assigned to a group,
+    and integrates the outputs of edge_summary to display connections between layers effectively.
 
 **Module 2: Mediation Analysis**
 
@@ -84,6 +87,31 @@ GFusionMed::plot_network(result_outcome = example_result_outcome,
 GFusionMed::plot_network(result_structure = example_result_structure,
     result_outcome = example_result_outcome, path = "Set your path",
     file_name = "plot_network_structure_outcome")
+
+# Sankey diagram when group information for the variables is available
+edge_structure <- GFusionMed::edge_summary(example_result_structure)
+edge_outcome <- GFusionMed::edge_summary(example_result_outcome)
+
+group_information <-
+    list(
+        CNA = list(
+            group1 = c("SHC1", "ERBB3", "ERBB2"),
+            group2 = c("SRC", "EGFR")
+        ),
+        mRNA = list(
+            group1 = c("SHC1", "ERBB3", "ERBB2"),
+            group2 = c("SRC", "EGFR")
+        ),
+        Protein = list(
+            group1 = c("SHC1", "ERBB3", "ERBB2"),
+            group2 = c("SRC", "EGFR")
+        ),
+        Drug = list(
+            erlotinib = c("erlotinib")
+        )
+    )
+
+GFusionMed::plot_sankey(edge_structure, edge_outcome, group_information)
 
 # Mediation analysis
 GFusionMed::perform_mediation_analysis(example_result_structure,
@@ -405,6 +433,36 @@ GFusionMed::plot_network(result_structure = result_structure,
 ```
 
 ![](./application/result_analysis/plot_network_structure_outcome_1.png)
+
+**Sankey diagram when group information for the variables is available**
+
+```r
+edge_structure <- GFusionMed::edge_summary(example_result_structure)
+edge_outcome <- GFusionMed::edge_summary(example_result_outcome)
+
+group_information <-
+    list(
+        CNA = list(
+            group1 = c("SHC1", "ERBB3", "ERBB2"),
+            group2 = c("SRC", "EGFR")
+        ),
+        mRNA = list(
+            group1 = c("SHC1", "ERBB3", "ERBB2"),
+            group2 = c("SRC", "EGFR")
+        ),
+        Protein = list(
+            group1 = c("SHC1", "ERBB3", "ERBB2"),
+            group2 = c("SRC", "EGFR")
+        ),
+        Drug = list(
+            erlotinib = c("erlotinib")
+        )
+    )
+
+GFusionMed::plot_sankey(edge_structure, edge_outcome, group_information)
+```
+
+![](./application/result_analysis/sankey_diagram.png)
 
 ## **`GFusionMed`** Module 2: Mediation Analysis
 

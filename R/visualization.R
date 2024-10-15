@@ -725,10 +725,57 @@ plot_network.structure_outcome <- function(result_structure, result_outcome, exp
 
 }
 
-#' Sankey Plot
+#' Sankey Diagram
 #'
-#' Visualizes the network when group information for the variables is available.
-#' 
+#' Visualizes the network using a Sankey diagram when group information for the variables is available.
+#' The diagram illustrates the flow and relationships between groups of variables across layers, 
+#' providing a clear visualization of how variables and outcomes are connected.
+#'
+#' @param edge_structure The output from \code{GFusionMed::edge_summary()} using 
+#' the results from \code{fit_structure_model()} (Module 1 of GFusionMed).
+#' @param edge_outcome The output from \code{GFusionMed::edge_summary()} using 
+#' the results from \code{fit_outcome_model()}. If multiple outcome results are available, 
+#' they can be combined using \code{rbind()}.
+#' @param group_information A list containing the group assignments for each layer. 
+#' All variables must belong to a group, and no variable can be left unassigned.
+#' @param vector_layer_color An optional vector specifying the colors for each layer in the network. 
+#' If not provided, default colors will be used.
+#'
+#' @details 
+#' The \code{plot_sankey()} function generates a Sankey diagram to visualize relationships across 
+#' layers or groups of variables. It integrates the structure and outcome networks to display how variables interact across layers.
+#' Group information is required for the variables in each layer, and any missing group assignment will result in an error.
+#'
+#' @return 
+#' This function outputs a Sankey diagram to the plotting device.
+#'
+#' @examples
+#' # Generate edge summaries
+#' edge_structure <- GFusionMed::edge_summary(example_result_structure)
+#' edge_outcome <- GFusionMed::edge_summary(example_result_outcome)
+#'
+#' # Define group information for variables
+#' group_information <- list(
+#'   CNA = list(
+#'     group1 = c("SHC1", "ERBB3", "ERBB2"),
+#'     group2 = c("SRC", "EGFR")
+#'   ),
+#'   mRNA = list(
+#'     group1 = c("SHC1", "ERBB3", "ERBB2"),
+#'     group2 = c("SRC", "EGFR")
+#'   ),
+#'   Protein = list(
+#'     group1 = c("SHC1", "ERBB3", "ERBB2"),
+#'     group2 = c("SRC", "EGFR")
+#'   ),
+#'   Drug = list(
+#'     erlotinib = c("erlotinib")
+#'   )
+#' )
+#'
+#' # Plot Sankey diagram
+#' GFusionMed::plot_sankey(edge_structure, edge_outcome, group_information)
+#'
 #' @export
 plot_sankey <- function(edge_structure, edge_outcome, group_information, vector_layer_color = NULL) {
 
