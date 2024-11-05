@@ -50,6 +50,11 @@
 #'   example_result_structure, example_result_outcome, example_exposure
 #' )
 #' 
+#' @references 
+#' Seo, Dahun, et al. 
+#' "Bayesian Multilayered Mediation Analysis for Cancer Pharmacogenomics." 
+#' Stat 13.4 (2024)
+#' 
 #' @export
 perform_mediation_analysis <- function(result_structure, result_outcome, exposure = NULL) {
 

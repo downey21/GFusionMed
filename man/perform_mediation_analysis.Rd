@@ -61,3 +61,8 @@ GFusionMed::perform_mediation_analysis(
 )
 
 }
+\references{
+Seo, Dahun, et al. 
+"Bayesian Multilayered Mediation Analysis for Cancer Pharmacogenomics." 
+Stat 13.4 (2024)
+}
