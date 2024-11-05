@@ -436,6 +436,13 @@ GFusionMed::plot_network(result_structure = result_structure,
 
 **Sankey diagram when group information for the variables is available**
 
+The **`plot_sankey`** function provides a Sankey diagram to visualize the flow and
+relationships between groups of variables across multiple omics layers, which influence the outcome.
+This function is particularly useful when there is grouped information about variables.
+
+In the example below, for example, SHC1, ERBB3, and ERBB2 are grouped as group1, while SRC andEGFR are grouped as group2.
+The Sankey diagram helps in understanding the flow of influence between these groups across different layers.
+
 ```r
 edge_structure <- GFusionMed::edge_summary(example_result_structure)
 edge_outcome <- GFusionMed::edge_summary(example_result_outcome)
@@ -463,6 +470,11 @@ GFusionMed::plot_sankey(edge_structure, edge_outcome, group_information)
 ```
 
 ![](./application/result_analysis/sankey_diagram.png)
+
+Moving beyond a single pathway analysis, the **`plot_sankey`** function can be used to generate a
+Sankey diagram considering influences across all pathways, offering a comprehensive view of variable interactions in multi-omics data.
+
+![](./application/result_analysis/sankey_diagram_all.png)
 
 ## **`GFusionMed`** Module 2: Mediation Analysis
 
