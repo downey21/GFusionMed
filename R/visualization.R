@@ -358,6 +358,10 @@ plot_network.structure <- function(result_structure, path, file_name, width = 20
 
     }
 
+    if (!is.null(vector_layer_color)) {
+        vector_layer_color <- setNames(vector_layer_color, vector_layer)
+    }
+
     if (is.null(vector_layer_color)) {
         vector_layer_color <- assign_colors(vector_layer)
     }
@@ -452,6 +456,10 @@ plot_network.outcome <- function(result_outcome, path, file_name, width = 20, he
             stop("vector_layer_color must be a vector containing colors, and its length must match the total number of structure layers.")
         }
 
+    }
+
+    if (!is.null(vector_layer_color)) {
+        vector_layer_color <- setNames(vector_layer_color, vector_layer)
     }
 
     if (is.null(vector_layer_color)) {
@@ -597,6 +605,10 @@ plot_network.structure_outcome <- function(result_structure, result_outcome, exp
             stop("vector_layer_color must be a vector containing colors, and its length must match the total number of layers, including the outcome layer.")
         }
 
+    }
+
+    if (!is.null(vector_layer_color)) {
+        vector_layer_color <- setNames(vector_layer_color, vector_layer)
     }
 
     if (is.null(vector_layer_color)) {
