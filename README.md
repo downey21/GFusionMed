@@ -51,7 +51,7 @@ the field of pharmaco-omics.
 ## Installation
 
 ```r
-devtools::install_github("downey21/GFusionMed", build_vignettes = TRUE)
+remotes::install_github("downey21/GFusionMed", build_vignettes = TRUE)
 ```
 
 ## Usage
