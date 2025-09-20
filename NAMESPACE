@@ -2,6 +2,7 @@
 
 S3method(edge_summary,outcome)
 S3method(edge_summary,structure)
+S3method(print,exposure_df)
 export(edge_summary)
 export(fit_outcome_model)
 export(fit_structure_model)

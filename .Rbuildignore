@@ -1,3 +1,6 @@
 ^application/
 ^doc$
 ^Meta$
+^\\.gitignore$
+^\\.DS_Store$
+^\\.history$

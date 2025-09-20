@@ -320,7 +320,9 @@ perform_mediation_analysis <- function(result_structure, result_outcome, exposur
 
 #' Internal function
 #'
-#' This is an internal function that is not exported.
+#' This is an internal function.
+#' 
+#' @export
 print.exposure_df <- function(x, ..., digits = 6, n_head = 10, show_all = FALSE) {
     info <- attr(x, "info")
 

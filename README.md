@@ -523,12 +523,32 @@ RTK_erlotinib_mRNA_EGFR <- GFusionMed::perform_mediation_analysis(result_structu
     result_outcome, exposure)
 
 print(RTK_erlotinib_mRNA_EGFR)
-#>        Mediator         IED PIP_IED         IEC PIP_IEC          IE PIP_IE
-#> 4  Protein_SHC1 -0.05089893  0.6183 -0.00202352  0.1161 -0.04887541 0.6703
-#> 1  Protein_EGFR -0.01181658  0.1117    8.16e-05  0.0127 -0.01189818 0.1118
-#> 3 Protein_ERBB3    1.28e-06  0.0018  -1.899e-05  0.0088   2.027e-05 0.0105
-#> 2 Protein_ERBB2   -8.66e-06  0.0012   4.724e-05  0.0074   -5.59e-05 0.0083
-#> 5   Protein_SRC   -1.84e-06   2e-04    3.47e-06  0.0017    -5.3e-06 0.0018
+#> Layer Info
+#> ----------
+#>   structure_layer: CNA, mRNA, Protein
+#>   outcome_layer : Drug
+#> 
+#> Mediation Analysis
+#> ------------------
+#>   Exposure      : mRNA_EGFR
+#>   Outcome       : Drug_erlotinib
+#>   TE (PIP)      : -0.095776 (0.809100)
+#>   DE (PIP)      : -0.034962 (0.165100)
+#>   IE (PIP)      : -0.060815 (0.730900)
+#> 
+#> Layer-wise IE Result
+#> --------------------
+#>    Layer layer_wise_IE PIP_layer_wise_IE
+#>  Protein     -0.060815          0.730900
+#> 
+#> individual IE Result
+#> --------------------
+#>       Mediator individual_IE PIP_individual_IE         IED PIP_IED        IEC PIP_IEC
+#>   Protein_SHC1   -0.04887541            0.6703 -0.05089893  0.6183 0.00202352  0.1161
+#>   Protein_EGFR   -0.01189818            0.1118 -0.01181658  0.1117  -8.16e-05  0.0127
+#>  Protein_ERBB3     2.027e-05            0.0105    1.28e-06  0.0018  1.899e-05  0.0088
+#>  Protein_ERBB2     -5.59e-05            0.0083   -8.66e-06  0.0012 -4.724e-05  0.0074
+#>    Protein_SRC      -5.3e-06            0.0018   -1.84e-06   2e-04  -3.47e-06  0.0017
 ```
 
 ```r
