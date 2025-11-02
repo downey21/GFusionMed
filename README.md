@@ -15,7 +15,7 @@ these layers mediate pharmacological responses. By simplifying the implementatio
 sophisticated techniques, **`GFusionMed`** aims to accelerate discoveries in
 the field of pharmaco-omics.
 
-![](./application/result_analysis/fig1.png)
+![](./application/result_analysis/fig1_v1.png)
 
 **Module 1: Graphical Data Fusion**
 
